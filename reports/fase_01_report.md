@@ -6,7 +6,28 @@
 
 ---
 
-## 1. Métricas y Resultados Cuantitativos Clave
+## 1. Fórmulas Matemáticas y Metodología de Agregación
+
+Para garantizar paridad dimensional estricta entre las fuentes de datos y preservar la conservación de masa de la demanda, se formalizan las siguientes ecuaciones:
+
+### 1.1. Agregación Multicanal de Demanda Real
+La demanda diaria total de cada Centro de Distribución $cd \in \mathcal{C}$ en la fecha de despacho $t$ se define como la suma de las entregas físicas en los canales de venta $\mathcal{K} = \{\text{PORTAL\_WEB}, \text{AGENTE\_COMERCIAL}, \text{ATENCION\_TELEFONICA}\}$:
+$$y_{cd, t}^{\text{real}} = \sum_{k \in \mathcal{K}} y_{cd, t, k}^{\text{real}}$$
+
+**Principio de Conservación de Demanda Física:**
+$$\sum_{cd \in \mathcal{C}} \sum_{t \in \mathcal{T}} y_{cd, t}^{\text{real}} \equiv \sum_{cd \in \mathcal{C}} \sum_{t \in \mathcal{T}} \sum_{k \in \mathcal{K}} y_{cd, t, k}^{\text{real}} = 2,011,978.87 \text{ unidades}$$
+
+### 1.2. Mapeo de Horizontes y Fechas
+Cada pronóstico emitido por el modelo base se genera en una fecha de emisión $t_{\text{emision}}$ para una fecha objetivo de despacho $t_{\text{despacho}}$ con un horizonte de planificación $h \in \{D+1, D+2, D+3, D+4\}$:
+$$t_{\text{despacho}} = t_{\text{emision}} + \Delta h, \quad \Delta h \in \{1, 2, 3, 4\} \text{ días}$$
+
+### 1.3. Integridad Referencial Conjuntista
+Se verifica que el conjunto de centros de distribución sea idéntico en las cuatro fuentes:
+$$\mathcal{C}_{\text{pedidos}} \equiv \mathcal{C}_{\text{pronostico}} \equiv \mathcal{C}_{\text{capacidad}} \equiv \mathcal{C}_{\text{plan}} = \{\text{CD\_CENTRO}, \text{CD\_ESTE}, \text{CD\_NORTE}, \text{CD\_OESTE}, \text{CD\_PACIFICO}, \text{CD\_SUR}\}$$
+
+---
+
+## 2. Métricas y Resultados Cuantitativos Clave
 
 - **Entorno de Ejecución:** Python 3.12+ gestionado con `uv`, empaquetado editable mediante `hatchling` (`dt-dsl==0.1.0`), con 89 dependencias resueltas de manera determinista e instaladas en entorno virtual `.venv`.
 - **Validación de Integridad Referencial:**

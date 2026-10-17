@@ -355,9 +355,30 @@ cells.append(nbf.v4.new_markdown_cell("""---
 ## 3. Tarea 2: Estado del Plan de Entrega, Capacidad y Estrategia de Negocio
 
 El dataset `plan_entrega_clientes_generico.csv` registra 739 órdenes de compra acordadas comercialmente con 90 clientes (15 por cada Centro de Distribución), permitiendo auditar la disciplina de cumplimiento de clientes y su impacto sobre la capacidad física de transporte.
+
+### 3.1. Fórmulas Matemáticas y Metodología de Cálculo
+
+1. **Bias de Volumen del Plan Comercial:**
+   $$\\text{Bias}_{\\text{volumen}} = \\frac{\\sum_{j=1}^M (y_j^{\\text{real}} - y_j^{\\text{plan}})}{\\sum_{j=1}^M y_j^{\\text{real}}} \\times 100\\%$$
+   donde $\\text{Bias} > 0$ indica subestimación sistemática de la demanda comercial respecto a las compras efectivas.
+
+2. **Desvío Temporal de Fecha de Compra ($\\Delta t$):**
+   $$\\Delta t_j = \\text{fecha\\_compra\\_real}_j - \\text{fecha\\_plan}_j \\quad (\\text{días}), \\qquad \\overline{\\Delta t} = \\frac{1}{M} \\sum_{j=1}^M \\Delta t_j$$
+
+3. **Asimetría de Desvíos (Late-to-Early Ratio):**
+   $$\\text{Late-to-Early Ratio} = \\frac{\\sum_{j=1}^M \\mathbb{I}(\\Delta t_j > 0)}{\\sum_{j=1}^M \\mathbb{I}(\\Delta t_j < 0)}$$
+
+4. **Tasa Global Fuera de Plan:**
+   $$\\text{Tasa Fuera} = \\frac{1}{M} \\sum_{j=1}^M \\mathbb{I}(\\text{fuera\\_de\\_plan}_j = 1) \\times 100\\%$$
+
+5. **Tasa de Ocupación Logística y Exceso de Flota:**
+   $$\\text{Ocupación}_{cd, t} = \\frac{y_{cd, t}^{\\text{real}}}{\\text{Capacidad\\_Máxima}_{cd, t}} \\times 100\\%, \\qquad \\text{Exceso}_{cd, t} = \\max\\left(0, \\; y_{cd, t}^{\\text{real}} - \\text{Capacidad\\_Máxima}_{cd, t}\\right)$$
+
+6. **Peak-to-Average Ratio (PAR) Semanal:**
+   $$\\text{PAR}_{cd} = \\frac{\\max_{d \\in \\{1,\\dots,7\\}} \\overline{y}_{cd, d}}{\\frac{1}{7} \\sum_{d=1}^7 \\overline{y}_{cd, d}}$$
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 3.1 Cálculo Explícito del Bias del Plan Comercial (Pregunta 1)
+cells.append(nbf.v4.new_code_cell("""# 3.2 Cálculo Explícito del Bias del Plan Comercial (Pregunta 1)
 total_plan_units = float(df_plan["unidades_plan"].sum())
 total_real_units = float(df_plan["unidades_reales"].sum())
 bias_plan_volumen = (total_real_units - total_plan_units) / total_real_units
@@ -386,7 +407,7 @@ print(f"Ratio Compras Retrasadas vs Adelantadas:        {retrasos / adelantos:.2
 print("="*65)
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### Respuesta Explícita a la Pregunta 1 (Tarea 2):
+cells.append(nbf.v4.new_markdown_cell(r"""### Respuesta Explícita a la Pregunta 1 (Tarea 2):
 **Sí, existe un Bias positivo sistemático en dos dimensiones:**
 1. **En Volumen:** El plan presenta un **Bias de +10.62%** ($(\text{Real} - \text{Plan}) / \text{Real}$). Los clientes compran un **11.9% más volumen** de lo comprometido originalmente (78,930 vs 70,550 unidades). Esto ocurre en todos los CDs (entre +9.1% y +12.4%).
 2. **En Fechas:** Existe un sesgo de postergación con **$\Delta$ promedio de +0.44 días**. Los clientes retrasan sus órdenes $3.45\times$ más veces de lo que las adelantan (100 retrasos vs 29 adelantos).
@@ -465,7 +486,7 @@ display(sat_summary.style.format({
 }))
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### 3.4. Respuestas Explícitas a las Preguntas 3 y 4 (Tarea 2)
+cells.append(nbf.v4.new_markdown_cell(r"""### 3.4. Respuestas Explícitas a las Preguntas 3 y 4 (Tarea 2)
 
 #### Pregunta 3: ¿Qué métricas adicionales calcularías para completar el panorama operativo?
 1. **Tasa de Adhesión por Cliente ($Adhesion\_Rate_i$):** Permite aislar al top 20% de clientes más indisciplinados (Efecto Pareto: 18 de 90 clientes generan más del 60% de los desvíos).
@@ -490,15 +511,24 @@ cells.append(nbf.v4.new_markdown_cell("""### 3.4. Respuestas Explícitas a las P
 cells.append(nbf.v4.new_markdown_cell("""---
 ## 4. Tarea 3: Modelo Complementario de Forecast y Rolling Backtest
 
-### 4.1. Arquitectura de Corrección Residual y Zero Data Leakage
-En lugar de predecir la demanda total desde cero con un modelo de caja negra, adoptamos un **enfoque complementario residual regularizado**:
+### 4.1. Fórmulas Matemáticas y Metodología de Machine Learning
 
-$$\\widehat{y}_{\\text{corregido}} = \\max\\left(0, \\; \\widehat{y}_{\\text{base}} + \\widehat{\\epsilon}\\right)$$
+1. **Formulación Residual con Activación No Negativa:**
+   $$\\epsilon_{cd, t, h} = y_{cd, t+h}^{\\text{real}} - \\hat{y}_{cd, t+h \\mid t}^{\\text{base}}$$
+   $$\\widehat{y}_{cd, t+h \\mid t}^{\\text{corregido}} = \\max\\left(0, \\; \\widehat{y}_{cd, t+h \\mid t}^{\\text{base}} + \\widehat{\\epsilon}_{cd, t, h}\\right)$$
+   donde $\\widehat{\\epsilon} = f(\\mathbf{x})$ predice analíticamente el residuo mediante regresión regularizada $L_2$ (Ridge).
 
-donde $\\widehat{\\epsilon} = f(X)$ predice el residuo del baseline mediante regresión Ridge ($L_2$ con $\\alpha=10.0$).
+2. **Función Objetivo de Optimización (Ridge Regression):**
+   $$\\min_{\\mathbf{w}} \\left\\{ \\frac{1}{2n} \\sum_{i=1}^n (\\epsilon_i - \\mathbf{w}^T \\mathbf{x}_i)^2 + \\frac{\\alpha}{2} \\|\\mathbf{w}\\|_2^2 \\right\\} \\implies \\mathbf{w}^* = (\\mathbf{X}^T \\mathbf{X} + \\alpha \\mathbf{I})^{-1} \\mathbf{X}^T \\boldsymbol{\\epsilon}$$
+   con hiperparámetro de penalización $\\alpha = 10.0$, garantizando condicionamiento numérico e invarianza frente a multicolinealidad.
 
-**Control Riguroso de Data Leakage:**
-Las características móviles (`mean_7d`, `mean_14d`, `mean_21d`, `std_7d`, `ratio_base_to_mean7`) se calculan **estrictamente con despachos cerrados antes de la fecha de emisión** (información disponible a las 06:00 AM del día de planeación).
+3. **Protocolo Estricto de Zero Data Leakage:**
+   Para cualquier emisión a las 06:00 AM en la fecha $t$, el conjunto de información admisible es $\\mathcal{F}_t = \\{ y_{cd, \\tau}^{\\text{real}} \\mid \\tau \\le t - 1 \\}$:
+   $$\\mu_W(cd, t) = \\frac{1}{W} \\sum_{k=1}^W y_{cd, t-k}^{\\text{real}}, \\qquad \\text{ratio\\_base\\_to\\_mean7} = \\frac{\\hat{y}_{cd, t+h \\mid t}^{\\text{base}}}{\\mu_7(cd, t) + 10^{-4}}$$
+   para ventanas retrospectivas $W \\in \\{7, 14, 21\\}$ días cerrados.
+
+4. **Protocolo de Validación Temporal (Rolling-Origin Backtest):**
+   Calentamiento de 28 días ($T_{\\text{warmup}} = 28$), evaluando secuencialmente $t = 28 \\dots 58$ con re-entrenamiento diario sobre historia estrictamente previa.
 """))
 
 cells.append(nbf.v4.new_code_cell("""# 4.2 Ejecución del Rolling-Origin Backtest (Validación Temporal Estricta)
@@ -554,7 +584,7 @@ display(df_hz_comp.style.format({
 }))
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### 4.5. Criterio Técnico y Honestidad Analítica
+cells.append(nbf.v4.new_markdown_cell(r"""### 4.5. Criterio Técnico y Honestidad Analítica
 1. **Desempeño en D+4:**
    - El WAPE en D+4 disminuye drásticamente de **22.98% a 9.90%** ($-13.08$ pp), pero es el horizonte con menor precisión comparado con D+1 (5.76%).
    - *Justificación Técnica:* A 4 días de anticipación, existe una incertidumbre irreducible derivada de órdenes fuera de plan que aún no se han emitido, la cual ningún modelo con datos pasados puede suprimir por completo.
@@ -572,9 +602,24 @@ El PDF requiere:
 * Si un centro tiene menos de 45 días de historia continua, el sistema debe activar un comportamiento de resguardo (*fallback*) seguro sin lanzar excepciones.
 * Si cuenta con 45 días o más, habilita el entrenamiento del modelo complementario.
 * Argumentar cuantitativamente las ventajas y riesgos de ajustar este umbral mínimo en producción.
+
+### 5.1. Fórmulas Matemáticas y Reglas de Resiliencia
+
+1. **Racha de Días Continuos sin Gaps:**
+   $$S_{cd}(t) = \\max \\left\\{ k \\in \\{1, \\dots, K\\} \\;\\middle|\\; \\tau_{K - j + 1} - \\tau_{K - j} = 1 \\text{ día}, \\; \\forall j \\in \\{1, \\dots, k-1\\} \\text{ y } \\tau_K = t - 1 \\right\\}$$
+
+2. **Función de Ruteo del Gate de Decisión:**
+   $$\\hat{y}_{cd, t+h \\mid t} = \\begin{cases} 
+   \\hat{y}_{cd, t+h \\mid t}^{\\text{corregido}} = \\max\\left(0, \\hat{y}_{cd, t+h \\mid t}^{\\text{base}} + f(\\mathbf{x}_{cd, t, h})\\right) & \\text{si } S_{cd}(t) \\ge 45 \\\\[6pt]
+   \\hat{y}_{cd, t+h \\mid t}^{\\text{base}} & \\text{si } S_{cd}(t) < 45 
+   \\end{cases}$$
+
+3. **Justificación Estadística del Umbral de 45 Días:**
+   $$N_{\\text{ciclos}} = \\lfloor 45 / 7 \\rfloor = 6 \\text{ ciclos semanales} \\implies \\text{SE}(\\overline{y}_d) = \\frac{\\sigma_d}{\\sqrt{6}} \\le 0.4082 \\sigma_d$$
+   reduciendo la dispersión del error relativo $\\sigma_{\\text{rel}}$ de $0.0661$ (15 días) a $0.0550$ (45 días).
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 5.1 Demostración Operativa del DataCoverageGate y Tolerancia a Fallos
+cells.append(nbf.v4.new_code_cell("""# 5.2 Demostración Operativa del DataCoverageGate y Tolerancia a Fallos
 gate = DataCoverageGate(min_continuous_days=45)
 
 # Caso 1: Centro nuevo con 15 días (Cold Start)
@@ -616,7 +661,7 @@ print(f"Modo activado:       {dec_gap.mode}")
 print(f"Racha continua real: {dec_gap.continuous_days} días (solo cuenta el bloque posterior al gap)")
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 5.2 Simulación Cuantitativa de Sensibilidad de Umbrales de Historia
+cells.append(nbf.v4.new_code_cell("""# 5.3 Simulación Cuantitativa de Sensibilidad de Umbrales de Historia
 df_sens = gate.run_sensitivity_analysis()
 
 print("--- Tabla de Sensibilidad: Rendimiento y Estabilidad vs Umbral de Días ---")
@@ -634,7 +679,7 @@ display(df_sens_styled.style.format({
 }))
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 5.3 Curva de Sensibilidad del WAPE vs Días de Historia
+cells.append(nbf.v4.new_code_cell("""# 5.4 Curva de Sensibilidad del WAPE vs Días de Historia
 plt.figure(figsize=(9, 4.5))
 plt.plot(df_sens["umbral_dias_historia"], df_sens["wape_modelo"] * 100, marker="o", color="#27ae60", linewidth=2.5, label="WAPE Modelo Corrector")
 plt.axvline(45, color="#c0392b", linestyle="--", linewidth=1.8, label="Umbral Calibrado (45 días = 6.4 sem)")
@@ -649,7 +694,7 @@ plt.tight_layout()
 plt.show()
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### 5.4. Justificación Cuantitativa del Umbral de 45 Días y Trade-Offs
+cells.append(nbf.v4.new_markdown_cell(r"""### 5.5. Justificación Cuantitativa del Umbral de 45 Días y Trade-Offs
 
 1. **Fundamento Estadístico (6.4 Ciclos Semanales):**
    - 45 días representan **$6.43$ semanas completas**. En series logísticas con fuerte estacionalidad intradiaria (el pico de los martes y valles de fin de semana), se requiere un mínimo de $N \ge 6$ observaciones por cada día de la semana para que el error estándar del estimador ($\text{SE} = \sigma / \sqrt{N}$) sea suficientemente bajo ($\text{SE} \le 0.40 \sigma$).

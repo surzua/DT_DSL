@@ -6,7 +6,49 @@
 
 ---
 
-## 1. Métricas y Resultados Cuantitativos Clave
+## 1. Fórmulas Matemáticas y Metodología de Cálculo (Tarea 1)
+
+Para auditar con rigor analítico la calidad del modelo base, se aplican las siguientes formulaciones matemáticas:
+
+### 1.1. Weighted Absolute Percentage Error (WAPE)
+$$\text{WAPE} = \frac{\sum_{i=1}^N |y_i^{\text{real}} - \hat{y}_i^{\text{base}}|}{\sum_{i=1}^N |y_i^{\text{real}}|}$$
+Mide el error porcentual ponderado por el volumen físico. A diferencia del MAPE clásico, es robusto ante denominadores cercanos a cero y no sobre-pondera errores en días de baja demanda.
+
+### 1.2. Forecast Bias (Sesgo Estructural Normalizado)
+$$\text{Bias} = \frac{\sum_{i=1}^N (y_i^{\text{real}} - \hat{y}_i^{\text{base}})}{\sum_{i=1}^N |y_i^{\text{real}}|}$$
+
+**Interpretación Rigurosa del Signo:**
+- $\mathbf{Bias > 0}$ **(Subestimación):** La demanda real supera al pronóstico ($y > \hat{y}$). Genera quiebre de stock, colapso de flota asignada y fuerza a contratar **fletes spot de emergencia con tarifas de sobreprecio del 150% al 300%**.
+- $\mathbf{Bias < 0}$ **(Sobreestimación):** El pronóstico supera a la realidad ($y < \hat{y}$). Genera capacidad de transporte ociosa y costo de almacenamiento.
+
+### 1.3. Métricas de Magnitud del Error (MAE y RMSE)
+$$\text{MAE} = \frac{1}{N} \sum_{i=1}^N |y_i^{\text{real}} - \hat{y}_i^{\text{base}}|$$
+$$\text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^N (y_i^{\text{real}} - \hat{y}_i^{\text{base}})^2}$$
+
+### 1.4. Función de Pérdida Asimétrica Logística
+Debido a la disparidad de costos de transporte entre quedarse corto versus excederse, se formaliza la función de costo asimétrico:
+$$\mathcal{L}_{\text{asym}}(y, \hat{y}) = \frac{\sum_{i=1}^N \left[ c_{\text{under}} \cdot \max(0, y_i^{\text{real}} - \hat{y}_i^{\text{base}}) + c_{\text{over}} \cdot \max(0, \hat{y}_i^{\text{base}} - y_i^{\text{real}}) \right]}{\sum_{i=1}^N |y_i^{\text{real}}|}$$
+donde se calibran los pesos operativos:
+- $c_{\text{under}} = 2.5$ (penalización severa por flete spot de última hora y multas contractuales de SLA).
+- $c_{\text{over}} = 1.0$ (costo estándar de oportunidad de camión ocioso).
+
+### 1.5. Degradación Temporal de Horizontes
+$$\Delta \text{WAPE}_{\text{abs}}(h) = \text{WAPE}(h) - \text{WAPE}(D+1)$$
+$$\Delta \text{WAPE}_{\text{rel}}(h) = \frac{\text{WAPE}(h) - \text{WAPE}(D+1)}{\text{WAPE}(D+1)} \times 100\%$$
+
+### 1.6. Demostración Aritmética Paso a Paso (Nivel Global)
+- $\sum_{i=1}^{1,380} y_i^{\text{real}} = 2,011,978.87 \text{ unidades}$
+- $\sum_{i=1}^{1,380} \hat{y}_i^{\text{base}} = 1,880,268.97 \text{ unidades}$
+- $\sum_{i=1}^{1,380} (y_i^{\text{real}} - \hat{y}_i^{\text{base}}) = +131,709.90 \text{ unidades}$
+- $\sum_{i=1}^{1,380} |y_i^{\text{real}} - \hat{y}_i^{\text{base}}| = 419,364.20 \text{ unidades}$
+
+$$\text{WAPE}_{\text{global}} = \frac{419,364.20}{2,011,978.87} = \mathbf{20.8434\%}$$
+$$\text{Bias}_{\text{global}} = \frac{+131,709.90}{2,011,978.87} = \mathbf{+6.5463\%} \implies \text{Subestimación neta global}$$
+$$\mathcal{L}_{\text{asym}} = \frac{2.5 \cdot (275,537.05) + 1.0 \cdot (143,827.15)}{2,011,978.87} = \frac{832,669.78}{2,011,978.87} = \mathbf{41.3856\%}$$
+
+---
+
+## 2. Métricas y Resultados Cuantitativos Clave
 
 El análisis se ejecutó sobre la totalidad de los 1,380 pronósticos emitidos por el modelo base entre el 2026-01-01 y el 2026-02-28, evaluados frente a las 2,011,979 unidades físicas reales despachadas.
 

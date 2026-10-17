@@ -4,9 +4,38 @@
 **Responsable:** Data Scientist Lead  
 **Estado:** COMPLETADO CON ÉXITO  
 
+## 1. Fórmulas Matemáticas y Metodología de Cálculo (Tarea 5)
+
+Para operacionalizar el motor de inferencia en tiempo real, la asignación de slots logísticos y el dimensionamiento de costos en la nube de AWS, se aplican las siguientes formulaciones analíticas:
+
+### 1.1. Balance de Capacidad en Tiempo Real (Redis & ECS Engine)
+Para un centro de distribución $cd$, una fecha de entrega solicitada $t$, y una orden tentativa de volumen $q_{\text{req}}$ evaluada en el checkout del portal B2B:
+$$\text{Capacidad\_Comprometida}(cd, t) = \sum_{j \in \mathcal{O}_{cd, t}} q_j$$
+$$\text{Capacidad\_Remanente}(cd, t) = \max\left(0, \; \text{Capacidad\_Máxima}(cd, t) - \text{Capacidad\_Comprometida}(cd, t)\right)$$
+$$\text{Tasa\_Ocupación\_Proyectada}(cd, t) = \frac{\text{Capacidad\_Comprometida}(cd, t) + q_{\text{req}}}{\text{Capacidad\_Máxima}(cd, t)} \times 100\%$$
+
+### 1.2. Reglas del Semáforo de Slotting Dinámico e Incentivos Económicos
+El microservicio de recomendación clasifica la ventana de despacho según umbrales de saturación:
+$$\text{Slot\_State}(cd, t) = \begin{cases}
+\text{VERDE (Ventana Valle)} & \text{si } \text{Ocupación}(cd, t) \le 60\% \implies \text{Descuento Flete } \delta = 2.5\% \\[6pt]
+\text{AMARILLO (Operación Regular)} & \text{si } 60\% < \text{Ocupación}(cd, t) \le 85\% \implies \text{Tarifa Estándar} \\[6pt]
+\text{ROJO (Saturación Crítica)} & \text{si } \text{Ocupación}(cd, t) > 85\% \implies \text{Surge Fee o Re-enrutamiento}
+\end{cases}$$
+
+### 1.3. Ecuación Financiera de FinOps y Retorno sobre Inversión (ROI)
+$$\text{ROI}_{\text{MLOps}} = \frac{\text{Ahorro Mensual por Fletes de Emergencia Evitados} - \text{Costo Infraestructura AWS}}{\text{Costo Infraestructura AWS}} \times 100\%$$
+- **Ahorro Logístico Mensual:**
+  $$\text{Ahorro} = N_{\text{fletes\_evitados}} \times \overline{\text{Costo}}_{\text{flete\_spot}}$$
+  Asumiendo la eliminación de los 6 colapsos mensuales de CD_NORTE (974 unidades excedentes acumuladas que forzaban fletes spot de larga distancia con costo medio de $\$650 \text{ USD}$):
+  $$\text{Ahorro} = 6 \times 650 = \$3,900 \text{ USD/mes}$$
+- **Costo de Infraestructura AWS (Fargate + ElastiCache + Step Functions + S3):**
+  $$\text{Costo}_{\text{AWS}} \approx \$185 \text{ USD/mes}$$
+- **Cálculo de Retorno Financiero:**
+  $$\text{ROI}_{\text{MLOps}} = \frac{3,900 - 185}{185} \times 100\% = \mathbf{2,008.11\%} \quad (\mathbf{21.08\times})$$
+
 ---
 
-## 1. Resumen de la Solución de Arquitectura
+## 2. Resumen de la Solución de Arquitectura
 
 Se diseñó la arquitectura conceptual completa en **Amazon Web Services (AWS)** para operacionalizar el sistema de corrección analítica de demanda, asignación dinámica de capacidad (*Dynamic Delivery Slotting*) y resiliencia ante arranque en frío (*Cold Start*).
 
@@ -63,7 +92,7 @@ graph TD
 
 ---
 
-## 2. Los Cuatro Pilares Arquitectónicos
+## 3. Los Cuatro Pilares Arquitectónicos
 
 ### Pilar 1: Procesamiento Batch y Re-entrenamiento (Heavy Compute)
 - **Orquestación:** AWS Step Functions como máquina de estados serverless, activada por Amazon EventBridge (trigger semanal o por alertas de drift).
@@ -91,14 +120,14 @@ graph TD
 
 ---
 
-## 3. Estimación Financiera y FinOps
+## 4. Estimación Financiera y FinOps
 
 - **Costo Total Estimado:** **~$140 - $230 USD mensuales** gracias al uso intensivo de componentes Serverless y Fargate.
 - **ROI Operativo:** El costo mensual completo de la arquitectura cloud equivale a una fracción de **un solo viaje spot de emergencia evitado** (costo típico de mercado: $400 a $1,200 USD por flete de larga distancia).
 
 ---
 
-## 4. Directrices e Inputs para la Fase 7 (Consolidación, Notebook y Deck)
+## 5. Directrices e Inputs para la Fase 7 (Consolidación, Notebook y Deck)
 
 1. **Integración en Notebook E2E:**
    - Estructurar el notebook `notebooks/01_analisis_y_modelado_e2e.ipynb` cubriendo las Tareas 1 a 4 con narrativa limpia y código modularizado.

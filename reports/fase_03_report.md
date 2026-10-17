@@ -4,9 +4,58 @@
 **Responsable:** Data Scientist Lead  
 **Estado:** COMPLETADO CON ÉXITO  
 
+## 1. Fórmulas Matemáticas y Metodología de Cálculo (Tarea 2)
+
+Para cuantificar el comportamiento operativo de los compromisos de entrega y la capacidad de transporte con precisión matemática, se definen y aplican las siguientes formulaciones:
+
+### 1.1. Bias de Volumen del Plan de Entrega
+$$\text{Bias}_{\text{volumen}} = \frac{\sum_{j=1}^M (y_j^{\text{real}} - y_j^{\text{plan}})}{\sum_{j=1}^M y_j^{\text{real}}} \times 100\%$$
+- **Interpretación del Signo:**
+  - $\mathbf{\text{Bias} > 0}$ **(Subestimación):** El cliente termina comprando físicamente más unidades de las pactadas en el plan ($y^{\text{real}} > y^{\text{plan}}$), forzando sobrecarga en flota y requerimientos imprevistos de transporte.
+  - $\mathbf{\text{Bias} < 0}$ **(Sobreestimación):** El cliente compra menos unidades de las comprometidas, dejando flota ociosa reservada y aumentando el costo unitario de transporte.
+- **Demostración Aritmética Paso a Paso:**
+  - $\sum_{j=1}^{739} y_j^{\text{real}} = 78,930.42 \text{ unidades}$
+  - $\sum_{j=1}^{739} y_j^{\text{plan}} = 70,549.90 \text{ unidades}$
+  - $\text{Diferencia neta} = 78,930.42 - 70,549.90 = +8,380.52 \text{ unidades}$
+  $$\text{Bias}_{\text{volumen}} = \frac{+8,380.52}{78,930.42} \times 100\% = \mathbf{+10.6176\%} \approx \mathbf{+10.62\%}$$
+
+### 1.2. Desvío Temporal de Fecha de Compra ($\Delta t$)
+Para cada pedido $j \in \{1, \dots, M\}$:
+$$\Delta t_j = \text{fecha\_compra\_real}_j - \text{fecha\_plan}_j \quad (\text{días})$$
+$$\overline{\Delta t} = \frac{1}{M} \sum_{j=1}^M \Delta t_j = \frac{+324}{739} = \mathbf{+0.4384 \text{ días}} \approx \mathbf{+0.44 \text{ días}}$$
+- $\Delta t_j > 0$: Compra postergada (retrasada).
+- $\Delta t_j = 0$: Compra en fecha pactada.
+- $\Delta t_j < 0$: Compra anticipada (adelantada).
+
+### 1.3. Asimetría de Desvíos Temporales (Late-to-Early Ratio)
+$$\text{Late-to-Early Ratio} = \frac{\sum_{j=1}^M \mathbb{I}(\Delta t_j > 0)}{\sum_{j=1}^M \mathbb{I}(\Delta t_j < 0)} = \frac{100}{29} = \mathbf{3.4483 \approx 3.45\times}$$
+Indica que por cada compra adelantada, se producen $3.45$ compras postergadas, generando acumulación logística diferida hacia mitad de semana.
+
+### 1.4. Tasa de Compras Fuera de Plan
+$$\text{Tasa Fuera de Plan} = \frac{1}{M} \sum_{j=1}^M \mathbb{I}(\text{fuera\_de\_plan}_j = 1) \times 100\% = \frac{129}{739} \times 100\% = \mathbf{17.4560\%} \approx \mathbf{17.46\%}$$
+
+### 1.5. Tasa de Adhesión por Cliente ($k$)
+Para cada cliente $k \in \{1, \dots, K\}$ con conjunto de pedidos $\mathcal{P}_k$:
+$$\text{Adhesion\_Rate}_k = \left( 1 - \frac{\sum_{j \in \mathcal{P}_k} \mathbb{I}(\text{fuera\_de\_plan}_j = 1)}{|\mathcal{P}_k|} \right) \times 100\%$$
+
+### 1.6. Porcentaje de Concentración de Demanda por Día de la Semana
+$$\% \text{Demanda}(d) = \frac{\sum_{cd=1}^6 \sum_{t \in \mathcal{T}_d} y_{cd, t}^{\text{real}}}{\sum_{cd=1}^6 \sum_{t=1}^T y_{cd, t}^{\text{real}}} \times 100\%$$
+Para los días martes ($d = \text{Martes}$):
+$$\% \text{Demanda}(\text{Martes}) = \frac{36,467.72}{78,930.42} \times 100\% = \mathbf{46.2023\%} \approx \mathbf{46.20\%}$$
+
+### 1.7. Tasa de Ocupación Logística Diaria y Exceso de Flota
+Para el centro $cd$ en el día $t$:
+$$\text{Ocupación}_{cd, t} = \frac{y_{cd, t}^{\text{real}}}{\text{Capacidad\_Máxima}_{cd, t}} \times 100\%$$
+$$\text{Exceso de Unidades}_{cd, t} = \max\left(0, \; y_{cd, t}^{\text{real}} - \text{Capacidad\_Máxima}_{cd, t}\right)$$
+$$\text{Tasa de Días Saturados}_{cd} = \frac{1}{T} \sum_{t=1}^T \mathbb{I}(\text{Ocupación}_{cd, t} > 100\%) \times 100\%$$
+
+### 1.8. Peak-to-Average Ratio (PAR) Semanal
+$$\text{PAR}_{cd} = \frac{\max_{d \in \{1,\dots,7\}} \overline{y}_{cd, d}}{\frac{1}{7} \sum_{d=1}^7 \overline{y}_{cd, d}}$$
+A nivel de red, el martes promedia más del doble del día medio ($\text{PAR} \approx 2.10\times$), constituyendo una falla estructural de nivelación de carga (Heijunka).
+
 ---
 
-## 1. Métricas y Resultados Cuantitativos Clave
+## 2. Métricas y Resultados Cuantitativos Clave
 
 El análisis abarca los 739 registros de compromisos comerciales de entrega correspondientes a 90 clientes B2B (15 por cada uno de los 6 Centros de Distribución), complementado con el cruce diario de capacidad máxima de transporte en los 60 días operativos.
 
@@ -59,7 +108,7 @@ Al contrastar la demanda total diaria contra la `capacidad_maxima_unidades`:
 
 ---
 
-## 2. Respuestas Explícitas a la Tarea 2 del Desafío
+## 3. Respuestas Explícitas a la Tarea 2 del Desafío
 
 ### Pregunta 1: ¿Existe un Bias en el plan de entrega? ¿Subestima o sobreestima sistemáticamente el comportamiento real de compra?
 **Respuesta:**
@@ -96,7 +145,7 @@ Al contrastar la demanda total diaria contra la `capacidad_maxima_unidades`:
    - *Cálculo:* Pedidos con $\Delta > 0$ / Pedidos con $\Delta < 0$.
    - *Aporte:* Un ratio de $3.45\times$ indica que la flota no sufre por clientes que "se anticipan", sino por clientes que "acumulan deuda logística" que explota a mitad de semana.
 4. **Índice de Saturación de Capacidad y Exceso de Flota:**
-   - *Cálculo:* Días con Ocupación $>100\%$ y suma de unidades excedentes.
+   - *Cálculo:* Días con Oocupación $>100\%$ y suma de unidades excedentes.
    - *Aporte:* Demuestra que CD_NORTE colapsa en el 10% de sus días, totalizando 974.26 unidades en exceso que obligan a contratar fletes spot de emergencia.
 
 ### Pregunta 4: Estrategia para aplanar la curva de demanda (efecto pico martes)
@@ -118,7 +167,7 @@ Al contrastar la demanda total diaria contra la `capacidad_maxima_unidades`:
 
 ---
 
-## 3. Artefactos Persistidos y Suite de Pruebas
+## 4. Artefactos Persistidos y Suite de Pruebas
 
 - **Tablas Procesadas:**
   - `data/processed/analisis_adhesion_clientes.csv` (90 registros con métricas por cliente y CD).
@@ -132,7 +181,7 @@ Al contrastar la demanda total diaria contra la `capacidad_maxima_unidades`:
 
 ---
 
-## 4. Directrices e Inputs para la Fase 4
+## 5. Directrices e Inputs para la Fase 4
 
 1. **Variables Explicativas Clave (Feature Engineering):**
    - Indicador explícito de día de la semana (`dia_semana`, especialmente `es_martes == 1`).

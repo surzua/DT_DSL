@@ -4,9 +4,64 @@
 **Responsable:** Data Scientist Lead  
 **Estado:** COMPLETADO CON ÉXITO  
 
+## 1. Fórmulas Matemáticas y Metodología de Cálculo (Tarea 3)
+
+Para subsanar las desviaciones sistemáticas del baseline sin perder la trazabilidad de negocio, se diseñó e implementó la siguiente formulación matemática rigurosa:
+
+### 1.1. Arquitectura de Corrección Residual Aditiva
+En lugar de entrenar un modelo que prediga la demanda absoluta desde cero, se modela analíticamente el residuo del baseline:
+$$\epsilon_{cd, t, h} = y_{cd, t+h}^{\text{real}} - \hat{y}_{cd, t+h \mid t}^{\text{base}}$$
+La predicción corregida final se obtiene mediante la suma del pronóstico base y el residuo estimado, acotada por una función de activación ReLU no negativa:
+$$\hat{y}_{cd, t+h \mid t}^{\text{corregido}} = \max\left(0, \; \hat{y}_{cd, t+h \mid t}^{\text{base}} + \hat{\epsilon}_{cd, t, h}\right)$$
+donde $\hat{\epsilon}_{cd, t, h} = f(\mathbf{x}_{cd, t, h})$ representa el ajuste inferido por el modelo de Machine Learning.
+
+### 1.2. Función Objetivo de Optimización (Ridge Regression $L_2$)
+El estimador de corrección optimiza la función de pérdida cuadrática regularizada por norma $L_2$:
+$$\min_{\mathbf{w}} \left\{ \frac{1}{2 n} \sum_{i=1}^n \left( \epsilon_i - \mathbf{w}^T \mathbf{x}_i \right)^2 + \frac{\alpha}{2} \|\mathbf{w}\|_2^2 \right\}$$
+Su solución analítica de forma cerrada está dada por:
+$$\mathbf{w}^* = \left( \mathbf{X}^T \mathbf{X} + \alpha \mathbf{I} \right)^{-1} \mathbf{X}^T \boldsymbol{\epsilon}$$
+- **Hiperparámetro:** $\alpha = 10.0$.
+- **Justificación Matemática:** Garantiza que la matriz $(\mathbf{X}^T \mathbf{X} + \alpha \mathbf{I})$ esté estrictamente bien condicionada (condición $\lambda_{\min} \ge \alpha > 0$), eliminando la varianza inducida por la multicolinealidad entre variables de calendario y lags, y evitando el sobreajuste (*overfitting*) en ventanas cortas de tiempo.
+
+### 1.3. Protocolo Estricto de Cero Filtración Temporal (*Zero Data Leakage*)
+Para cualquier emisión ejecutada a las 06:00 AM de la fecha $t$ proyectando a horizonte $h \in \{1, 2, 3, 4\}$, el conjunto de información admisible es:
+$$\mathcal{F}_t = \left\{ y_{cd, \tau}^{\text{real}} \mid \tau \le t - 1 \right\}$$
+Las variables de nivel y volatilidad se calculan sobre ventanas móviles retrospectivas de tamaño $W \in \{7, 14, 21\}$ días:
+$$\mu_{W}(cd, t) = \frac{1}{W} \sum_{k=1}^W y_{cd, t-k}^{\text{real}}$$
+$$\sigma_{W}(cd, t) = \sqrt{\frac{1}{W-1} \sum_{k=1}^W \left( y_{cd, t-k}^{\text{real}} - \mu_{W}(cd, t) \right)^2}$$
+$$\text{ratio\_base\_to\_mean7}(cd, t, h) = \frac{\hat{y}_{cd, t+h \mid t}^{\text{base}}}{\mu_7(cd, t) + 10^{-4}}$$
+Queda prohibido por construcción el uso de $y_{cd, t}^{\text{real}}$ o de información posterior a la fecha de corte $t-1$.
+
+### 1.4. Algoritmo de Evaluación Secuencial (Rolling-Origin Backtest)
+1. **Fase de Calentamiento Inicial (*Warmup*):**
+   $$T_{\text{warmup}} = 28 \text{ días} \quad (\text{4 semanas completas de historia})$$
+2. **Iteración Temporal Secuencial:** Para cada fecha de emisión $t = T_{\text{warmup}}, \dots, T_{\max}-1$:
+   - Entrenar $\mathbf{w}_t^*$ sobre el conjunto histórico acumulado:
+     $$\mathcal{D}_t = \{(\mathbf{x}_i, \epsilon_i) \mid \text{fecha\_despacho}_i \le t - 1\}$$
+   - Predecir simultáneamente los 4 horizontes fuera de muestra:
+     $$\hat{\epsilon}_{cd, t, h} = (\mathbf{w}_t^*)^T \mathbf{x}_{cd, t, h} \quad \forall cd \in \{1,\dots,6\}, \; h \in \{1,2,3,4\}$$
+     $$\hat{y}_{cd, t+h \mid t}^{\text{corregido}} = \max\left(0, \; \hat{y}_{cd, t+h \mid t}^{\text{base}} + \hat{\epsilon}_{cd, t, h}\right)$$
+   - Registrar métricas y avanzar el origen temporal a $t + 1$.
+
+### 1.5. Demostración Aritmética Paso a Paso (Backtest Out-of-Time, $N = 708$)
+- **Volumen Total Real Evaluado:** $\sum_{i=1}^{708} y_i^{\text{real}} = 1,043,907.03 \text{ unidades}$
+- **Baseline Oficial:**
+  - $\sum |y_i^{\text{real}} - \hat{y}_i^{\text{base}}| = 216,396.96 \text{ unidades}$
+  $$\text{WAPE}_{\text{base}} = \frac{216,396.96}{1,043,907.03} = \mathbf{20.7295\%} \approx \mathbf{20.73\%}$$
+  - $\sum (y_i^{\text{real}} - \hat{y}_i^{\text{base}}) = +69,820.65 \text{ unidades}$
+  $$\text{Bias}_{\text{base}} = \frac{+69,820.65}{1,043,907.03} = \mathbf{+6.6884\%} \approx \mathbf{+6.69\%}$$
+- **Modelo Corrector ML:**
+  - $\sum |y_i^{\text{real}} - \hat{y}_i^{\text{corregido}}| = 76,001.35 \text{ unidades}$
+  $$\text{WAPE}_{\text{modelo}} = \frac{76,001.35}{1,043,907.03} = \mathbf{7.2805\%} \approx \mathbf{7.28\%}$$
+  - $\sum (y_i^{\text{real}} - \hat{y}_i^{\text{corregido}}) = +7,185.34 \text{ unidades}$
+  $$\text{Bias}_{\text{modelo}} = \frac{+7,185.34}{1,043,907.03} = \mathbf{+0.6883\%} \approx \mathbf{+0.69\%}$$
+- **Diferencial de Rendimiento:**
+  $$\Delta \text{WAPE} = 7.2805\% - 20.7295\% = \mathbf{-13.4490 \text{ pp}} \quad \left( \frac{-13.4490}{20.7295} \times 100\% = \mathbf{-64.88\%} \right)$$
+  $$\Delta \text{Pérdida Asimétrica} = 13.26\% - 41.30\% = \mathbf{-28.04 \text{ pp}} \quad (\mathbf{-67.89\% \text{ en costo logístico}})$$
+
 ---
 
-## 1. Métricas y Resultados Cuantitativos Clave
+## 2. Métricas y Resultados Cuantitativos Clave
 
 La validación se ejecutó mediante un **Rolling-Origin Backtest** estricto con ventana de calentamiento inicial de 28 días (4 semanas completas), evaluando 31 fechas continuas de emisión y un total de **708 pronósticos fuera de muestra (*out-of-time*)** sin filtración de información futura (*zero data leakage*).
 
@@ -42,9 +97,9 @@ La validación se ejecutó mediante un **Rolling-Origin Backtest** estricto con 
 
 ---
 
-## 2. Metodología e Ingeniería de Características
+## 3. Metodología e Ingeniería de Características
 
-### 2.1. Arquitectura de Corrección Residual
+### 3.1. Arquitectura de Corrección Residual
 En lugar de sustituir el pronóstico base por un modelo *black-box* que intente estimar la demanda absoluta desde cero, adoptamos un **enfoque complementario residual**:
 $$\widehat{y}_{\text{corregido}} = \max\left(0, \; \widehat{y}_{\text{base}} + \widehat{\epsilon}\right)$$
 donde $\widehat{\epsilon} = f(X)$ predice analíticamente el residuo del baseline.
@@ -54,13 +109,13 @@ donde $\widehat{\epsilon} = f(X)$ predice analíticamente el residuo del baselin
 2. **Restricción de No-Negatividad Física:** El operador $\max(0, \cdot)$ garantiza que jamás se generen órdenes negativas de despacho.
 3. **Estabilidad y Rapidez:** Emplea regularización $L_2$ (Ridge con $\alpha=10.0$) que previene el sobreajuste ante muestras de 60 días y produce inferencia sub-milisegundo.
 
-### 2.2. Prevención Rigurosa de Data Leakage
+### 3.2. Prevención Rigurosa de Data Leakage
 Un error común en forecasting logístico es calcular medias móviles usando la fecha de despacho o la demanda del mismo día de emisión. En nuestra arquitectura:
 - El pronóstico para `fecha_despacho` se emite en `fecha_emision`.
 - Las métricas móviles (`mean_7d`, `mean_14d`, `mean_21d`, `std_7d`) se calculan **estrictamente con las fechas de despacho cerradas antes de `fecha_emision`** ($\text{fecha\_despacho} < \text{fecha\_emision}$).
 - Cero filtración temporal: el modelo opera con la misma información que existiría en la bodega a las 06:00 AM del día de emisión.
 
-### 2.3. Top 5 Características Más Determinantes
+### 3.3. Top 5 Características Más Determinantes
 1. **Dummies de Centro de Distribución:** Capturan el desfase geográfico permanente (peso negativo para CD_CENTRO/CD_OESTE/CD_PACIFICO y positivo para CD_SUR/CD_ESTE).
 2. **Interacciones `centro_distribucion_x_martes`:** Ajustan el pico explosivo del martes específicamente en CD_NORTE y CD_SUR.
 3. **Móvil 7 días (`mean_7d`):** Provee el nivel reciente de operación del centro.
@@ -69,7 +124,7 @@ Un error común en forecasting logístico es calcular medias móviles usando la 
 
 ---
 
-## 3. Honestidad Técnica y Análisis Crítico de Limitaciones
+## 4. Honestidad Técnica y Análisis Crítico de Limitaciones
 
 Siguiendo las pautas del desafío, exponemos transparentemente el comportamiento del modelo:
 1. **Comportamiento en D+4:**
@@ -81,7 +136,7 @@ Siguiendo las pautas del desafío, exponemos transparentemente el comportamiento
 
 ---
 
-## 4. Artefactos Persistidos y Suite de Pruebas
+## 5. Artefactos Persistidos y Suite de Pruebas
 
 - **Tabla de Resultados:** `data/processed/backtest_results_comparison.csv` (35 filas cubriendo niveles global, centro, horizonte y cruces detallados).
 - **Figuras Diagnósticas:**
@@ -93,7 +148,7 @@ Siguiendo las pautas del desafío, exponemos transparentemente el comportamiento
 
 ---
 
-## 5. Directrices e Inputs para la Fase 5 (Gate de Resiliencia 45 Días)
+## 6. Directrices e Inputs para la Fase 5 (Gate de Resiliencia 45 Días)
 
 1. **Requerimiento Mínimo de Muestra:**
    - Para calcular ventanas móviles de 21 días y capturar al menos 3 a 4 ciclos semanales representativos (especialmente la recurrencia del efecto martes), el modelo requiere un volumen suficiente de historia continua.

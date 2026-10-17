@@ -4,9 +4,41 @@
 **Responsable:** Data Scientist Lead  
 **Estado:** COMPLETADO CON ÉXITO  
 
+## 1. Fórmulas Matemáticas y Metodología de Cálculo (Tarea 4)
+
+Para gobernar el enrutamiento seguro de pronósticos y evitar fallas en centros nuevos o con interrupciones (*cold start*), se implementa la siguiente formulación analítica:
+
+### 1.1. Algoritmo de Racha de Historia Continua sin Huecos
+Dada la secuencia temporal ordenada de fechas de despacho cerradas para un centro de distribución $cd$:
+$$\mathcal{T}_{cd} = (\tau_1, \tau_2, \dots, \tau_K), \quad \tau_1 < \tau_2 < \dots < \tau_K \le t - 1$$
+La racha de continuidad retrospectiva $S_{cd}(t)$ desde el día previo a la emisión ($t - 1$) se formula formalmente como:
+$$S_{cd}(t) = \max \left\{ k \in \{1, \dots, K\} \;\middle|\; \tau_{K - j + 1} - \tau_{K - j} = 1 \text{ día}, \; \forall j \in \{1, \dots, k-1\} \text{ y } \tau_K = t - 1 \right\}$$
+Si la fecha más reciente $\tau_K < t - 1$ (gap temporal de datos no sincronizados), $S_{cd}(t) = 0$.
+
+### 1.2. Función de Decisión y Ruteo del Gate de Resiliencia
+El despachador de pronósticos ejecuta la función por ramas:
+$$\hat{y}_{cd, t+h \mid t} = \begin{cases} 
+\hat{y}_{cd, t+h \mid t}^{\text{corregido}} = \max\left(0, \hat{y}_{cd, t+h \mid t}^{\text{base}} + f(\mathbf{x}_{cd, t, h})\right) & \text{si } S_{cd}(t) \ge \theta_{\text{historia}} \\[8pt]
+\hat{y}_{cd, t+h \mid t}^{\text{base}} & \text{si } S_{cd}(t) < \theta_{\text{historia}} 
+\end{cases}$$
+con umbral operacional calibrado en $\theta_{\text{historia}} = 45 \text{ días}$.
+
+### 1.3. Justificación Estadística del Umbral $\theta_{\text{historia}} = 45 \text{ Días}$
+- **Número de Ciclos Semanales Completos:**
+  $$N_{\text{ciclos}} = \left\lfloor \frac{45}{7} \right\rfloor = 6 \text{ ciclos completos} \quad (6.43 \text{ semanas})$$
+  Para cualquier estimador de demanda media condicional por día de la semana $\overline{y}_{d}$ ($d \in \{\text{Lunes}, \dots, \text{Domingo}\}$):
+  $$\text{Var}(\overline{y}_d) = \frac{\sigma_d^2}{N_{\text{ciclos}}} \implies \text{SE}(\overline{y}_d) = \frac{\sigma_d}{\sqrt{N_{\text{ciclos}}}} \le \frac{\sigma_d}{\sqrt{6}} \approx 0.4082 \sigma_d$$
+  Con $N_{\text{ciclos}} \le 2$ (e.g. 15 días), $\text{SE} \ge 0.7071 \sigma_d$, lo que incrementa la varianza del estimador en un **$73.2\%$**, dejando al modelo vulnerable a perturbaciones atípicas de un único día festivo o climático.
+
+- **Dispersión del Error Relativo:**
+  $$\sigma_{\text{rel}} = \sqrt{\frac{1}{M} \sum_{m=1}^M \left( \frac{|y_m - \hat{y}_m|}{y_m} - \overline{\text{APE}} \right)^2}$$
+  - A 15 días: $\sigma_{\text{rel}} = \mathbf{0.0661}$
+  - A 45 días: $\sigma_{\text{rel}} = \mathbf{0.0550}$
+  - Reducción de volatilidad de pronóstico: $\frac{0.0550 - 0.0661}{0.0661} = \mathbf{-16.79\%}$.
+
 ---
 
-## 1. Métricas y Resultados Cuantitativos Clave
+## 2. Métricas y Resultados Cuantitativos Clave
 
 Se simuló el comportamiento del modelo complementario frente a diferentes profundidades de historia continua para evaluar la estabilidad del aprendizaje y justificar matemáticamente la regla de resiliencia.
 
@@ -25,7 +57,7 @@ Se simuló el comportamiento del modelo complementario frente a diferentes profu
 
 ---
 
-## 2. Justificación Cuantitativa del Umbral de 45 Días
+## 3. Justificación Cuantitativa del Umbral de 45 Días
 
 El umbral de **45 días de historia continua** no es una heurística arbitraria, sino una decisión fundamentada en tres pilares estadísticos y operativos:
 
@@ -41,7 +73,7 @@ El umbral de **45 días de historia continua** no es una heurística arbitraria,
 
 ---
 
-## 3. Análisis de Trade-Offs: Ventajas y Riesgos de Ajustar el Umbral en Producción
+## 4. Análisis de Trade-Offs: Ventajas y Riesgos de Ajustar el Umbral en Producción
 
 ### Escenario A: Calibrar a 30 Días (Menor Exigencia)
 - **Ventaja de Negocio:** *Menor Time-to-Value*. Un nuevo Centro de Distribución o una nueva zona geográfica se habilita en el modelo predictivo avanzado en 1 mes en lugar de 1.5 meses.
@@ -61,7 +93,7 @@ El umbral de **45 días es el punto óptimo de compromiso (*sweet spot*)**, dond
 
 ---
 
-## 4. Implementación del Mecanismo de Control (Gate) y Tolerancia a Fallos
+## 5. Implementación del Mecanismo de Control (Gate) y Tolerancia a Fallos
 
 El módulo `src/resilience/gate.py` implementa la clase `DataCoverageGate`:
 1. **Inspección de Continuidad Estricta:**
@@ -74,7 +106,7 @@ El módulo `src/resilience/gate.py` implementa la clase `DataCoverageGate`:
 
 ---
 
-## 5. Artefactos Persistidos y Suite de Pruebas
+## 6. Artefactos Persistidos y Suite de Pruebas
 
 - **Módulo Operativo:** `src/resilience/gate.py`
 - **Tabla de Simulación:** `data/processed/sensibilidad_gate_dias.csv`
@@ -91,7 +123,7 @@ El módulo `src/resilience/gate.py` implementa la clase `DataCoverageGate`:
 
 ---
 
-## 6. Directrices e Inputs para la Fase 6 (Arquitectura Cloud AWS)
+## 7. Directrices e Inputs para la Fase 6 (Arquitectura Cloud AWS)
 
 1. **Diseño de Bifurcación:** El microservicio de inferencia en AWS ECS / Lambda debe incorporar el `DataCoverageGate` como middleware previo al cómputo del modelo.
 2. **Métricas de Observabilidad:** Registrar en Amazon CloudWatch un contador de eventos `FallbackActivated` por CD para monitorear qué centros están en cold start y alertar cuando cumplan el día 45 para promoverlos a re-entrenamiento automático en Amazon SageMaker.
