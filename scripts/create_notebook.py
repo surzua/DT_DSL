@@ -511,27 +511,112 @@ cells.append(nbf.v4.new_markdown_cell(r"""### 3.4. Respuestas Explícitas a las 
 cells.append(nbf.v4.new_markdown_cell("""---
 ## 4. Tarea 3: Modelo Complementario de Forecast y Rolling Backtest
 
-### 4.1. Fórmulas Matemáticas y Metodología de Machine Learning
+El PDF establece dos requerimientos mínimos indispensables para esta tarea:
+1. **Ingeniería de características:** día de la semana, indicadores de picos de demanda y métricas móviles (*rolling features*).
+2. **Validación cruzada con origen rodante (*rolling-origin backtest*):** que demuestre cuantitativamente el efecto del modelo sobre el WAPE global, en comparación con el modelo base.
 
-1. **Formulación Residual con Activación No Negativa:**
-   $$\\epsilon_{cd, t, h} = y_{cd, t+h}^{\\text{real}} - \\hat{y}_{cd, t+h \\mid t}^{\\text{base}}$$
-   $$\\widehat{y}_{cd, t+h \\mid t}^{\\text{corregido}} = \\max\\left(0, \\; \\widehat{y}_{cd, t+h \\mid t}^{\\text{base}} + \\widehat{\\epsilon}_{cd, t, h}\\right)$$
-   donde $\\widehat{\\epsilon} = f(\\mathbf{x})$ predice analíticamente el residuo mediante regresión regularizada $L_2$ (Ridge).
+---
 
-2. **Función Objetivo de Optimización (Ridge Regression):**
-   $$\\min_{\\mathbf{w}} \\left\\{ \\frac{1}{2n} \\sum_{i=1}^n (\\epsilon_i - \\mathbf{w}^T \\mathbf{x}_i)^2 + \\frac{\\alpha}{2} \\|\\mathbf{w}\\|_2^2 \\right\\} \\implies \\mathbf{w}^* = (\\mathbf{X}^T \\mathbf{X} + \\alpha \\mathbf{I})^{-1} \\mathbf{X}^T \\boldsymbol{\\epsilon}$$
-   con hiperparámetro de penalización $\\alpha = 10.0$, garantizando condicionamiento numérico e invarianza frente a multicolinealidad.
+### 4.1. Estrategia y Enfoque del Modelo Corrector Residual
 
-3. **Protocolo Estricto de Zero Data Leakage:**
-   Para cualquier emisión a las 06:00 AM en la fecha $t$, el conjunto de información admisible es $\\mathcal{F}_t = \\{ y_{cd, \\tau}^{\\text{real}} \\mid \\tau \\le t - 1 \\}$:
-   $$\\mu_W(cd, t) = \\frac{1}{W} \\sum_{k=1}^W y_{cd, t-k}^{\\text{real}}, \\qquad \\text{ratio\\_base\\_to\\_mean7} = \\frac{\\hat{y}_{cd, t+h \\mid t}^{\\text{base}}}{\\mu_7(cd, t) + 10^{-4}}$$
-   para ventanas retrospectivas $W \\in \\{7, 14, 21\\}$ días cerrados.
+En la auditoría de la Tarea 1 descubrimos que el pronóstico base exhibe **sesgos estructurales crónicos** (+31.1% de subestimación en CD_SUR, -22.5% de sobreestimación en CD_PACIFICO, -19.4% en CD_CENTRO). Asimismo, en la Tarea 2 identificamos un **pico recurrente de demanda los martes** (46.2% del volumen semanal) que no está sincronizado con la capacidad de los centros.
 
-4. **Protocolo de Validación Temporal (Rolling-Origin Backtest):**
-   Calentamiento de 28 días ($T_{\\text{warmup}} = 28$), evaluando secuencialmente $t = 28 \\dots 58$ con re-entrenamiento diario sobre historia estrictamente previa.
+Para resolver esto en una operación real, **no conviene descartar el modelo existente para predecir la demanda desde cero con una "caja negra"**:
+- El pronóstico base ya contiene reglas de negocio consolidadas y acuerdos comerciales.
+- Predecir series temporales cortas (60 días) desde cero con modelos complejos genera alta varianza y sobreajuste (*overfitting*).
+
+**Nuestra propuesta: Modelo Complementario Residual Aditivo**
+Dejamos que el pronóstico base haga el trabajo grueso y entrenamos un modelo de Machine Learning enfocado exclusivamente en aprender y neutralizar la brecha sistemática de error (el residuo):
+$$\\text{Residuo} = y_{\\text{real}} - \\hat{y}_{\\text{base}}$$
+La predicción final corregida se calcula sumando el pronóstico base y el residuo estimado por el modelo, con una restricción física de no negatividad:
+$$\\widehat{y}_{\\text{corregido}} = \\max\\left(0, \\; \\widehat{y}_{\\text{base}} + \\widehat{\\text{Residuo}}\\right)$$
+
+Como estimador utilizamos una **Regresión Regularizada Ridge ($L_2$ con $\\alpha=10.0$)**:
+- Entrega solución analítica exacta en forma cerrada en menos de 1 milisegundo.
+- Elimina el riesgo de sobreajuste ante multicolinealidad.
+- Proporciona coeficientes lineales $100\\%$ auditables para los líderes de logística.
+
+---
+
+### 4.2. Ingeniería de Características (Feature Engineering) Detallada
+
+Para alimentar el modelo, construimos 26 variables explicativas agrupadas en las 4 familias que dan cumplimiento estricto y expandido al PDF:
+
+1. **Día de la Semana y Efectos de Calendario (Estacionalidad Intra-semanal):**
+   - `dia_semana_despacho`: Día de entrega (0 = Lunes, ..., 6 = Domingo).
+   - `es_lunes`, `es_fin_de_semana`: Banderas binarias que capturan el arranque de semana y la menor actividad en sábado/domingo.
+   - `dia_mes`: Día del mes (1 a 31), capturando ciclos de facturación y reposición quincenal/mensual.
+
+2. **Indicadores de Picos de Demanda e Interacciones Espacio-Temporales:**
+   - `es_martes`: Bandera binaria (1 si el despacho es martes, 0 en otro caso). Derivada directamente del hallazgo de la Tarea 2 sobre el pico de compras.
+   - `centro_distribucion_X_x_martes`: Interacción multiplicativa entre el indicador de martes y cada centro de distribución. Esto permite al modelo aprender que el pico de martes satura con distinta intensidad a CD_NORTE o CD_SUR respecto a CD_PACIFICO.
+
+3. **Métricas Móviles (Rolling Features) con Control Estricto de Cero Filtración (*Zero Data Leakage*):**
+   - Calculamos el nivel medio (`mean_7d`, `mean_14d`, `mean_21d`) y la dispersión (`std_7d`, `std_14d`, `std_21d`) de la demanda real reciente en ventanas de 1, 2 y 3 ciclos semanales.
+   - **Protocolo de Cero Filtración:** Para cualquier pronóstico emitido a las 06:00 AM del día $t$ proyectando a horizontes $D+1$ a $D+4$, **únicamente se consideran despachos cerrados antes de $t$** ($\\text{fecha\\_despacho} < \\text{fecha\\_emision}$). Jamás se incluye la demanda del mismo día de emisión ni de días posteriores, emulando la realidad de la bodega.
+
+4. **Señales de Discrepancia del Baseline y Desfases Geográficos:**
+   - `unidades_pronosticadas`: Nivel propuesto por el modelo base.
+   - `horizonte_num`: Días de anticipación ($1, 2, 3, 4$), permitiendo modular la corrección según el horizonte.
+   - `ratio_base_to_mean7`: Razón entre el pronóstico base y el promedio móvil de 7 días ($\\frac{\\hat{y}_{\\text{base}}}{\\text{mean\\_7d}}$). Funciona como una alerta temprana: si el baseline se dispara por encima de la tendencia reciente, el modelo ajusta a la baja.
+   - Variables *One-Hot* por Centro de Distribución: Absorben los sesgos fijos de nivel descubiertos en la Tarea 1.
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 4.2 Ejecución del Rolling-Origin Backtest (Validación Temporal Estricta)
+cells.append(nbf.v4.new_code_cell("""# 4.3 Construcción Explícita del Feature Pipeline y Exploración de Variables
+pipeline = DemandFeaturePipeline(rolling_windows=(7, 14, 21))
+df_features = pipeline.fit_transform(df_pronostico, df_demanda)
+feature_cols = pipeline.feature_columns
+
+print("="*80)
+print("     MATRIZ DE CARACTERÍSTICAS (FEATURE ENGINEERING) - TAREA 3")
+print("="*80)
+print(f"Total registros procesados:         {len(df_features):,d} observaciones (60 días x 6 CDs x 4 horizontes)")
+print(f"Total variables predictoras (X):    {len(feature_cols)} features")
+print("="*80)
+
+# Clasificación pedagógica de las características creadas
+f_cal = ["dia_semana_despacho", "es_martes", "es_lunes", "es_fin_de_semana", "dia_mes"]
+f_picos = ["es_martes"] + [c for c in feature_cols if "x_martes" in c]
+f_rolling = [c for c in feature_cols if "mean_" in c or "std_" in c]
+f_base = ["unidades_pronosticadas", "horizonte_num", "ratio_base_to_mean7"]
+f_cds = [c for c in feature_cols if c.startswith("centro_distribucion_") and "x_martes" not in c]
+
+print("\\nDesglose de Características Diseñadas (cumplimiento requerimientos PDF):")
+print(f"1. Calendario / Día de la Semana ({len(f_cal)}):        {', '.join(f_cal)}")
+print(f"2. Indicadores de Picos e Interacción ({len(f_picos)}):    {', '.join(f_picos)}")
+print(f"3. Métricas Móviles sin Leakage ({len(f_rolling)}):       {', '.join(f_rolling)}")
+print(f"4. Señales de Baseline y Discrepancia ({len(f_base)}):   {', '.join(f_base)}")
+print(f"5. Dummies de Centro de Distribución ({len(f_cds)}):   {', '.join(f_cds)}")
+
+# Vista previa de la matriz de características generada
+cols_preview = [
+    "centro_distribucion", "fecha_emision", "fecha_despacho", "horizonte",
+    "unidades_pronosticadas", "unidades_reales", "residual",
+    "es_martes", "mean_7d", "std_7d", "ratio_base_to_mean7"
+]
+print("\\nVista previa de datos transformados (primeras 8 filas):")
+display(df_features[cols_preview].head(8))
+"""))
+
+cells.append(nbf.v4.new_markdown_cell("""---
+### 4.4. Validación Cruzada con Origen Rodante (*Rolling-Origin Backtest*)
+
+El PDF requiere demostrar cuantitativamente el efecto del modelo sobre el WAPE global frente al modelo base mediante una **validación cruzada con origen rodante**.
+
+**¿Por qué no usar validación cruzada tradicional (K-Fold aleatorio)?**
+En series temporales logísticas, una partición aleatoria mezclaría información del futuro con el pasado, provocando una fuga masiva de información (*lookahead bias*) y métricas engañosamente optimistas.
+
+**Protocolo Operativo del Rolling-Origin Backtest:**
+1. **Calentamiento Inicial (*Warmup* de 28 días):**
+   Se reservan 4 semanas completas para que las medias móviles de 7, 14 y 21 días se estabilicen con datos reales limpios.
+2. **Evaluación Secuencial Día a Día ($t = 28 \\dots 58$, 31 fechas de corte):**
+   - Para cada día de emisión $t$ a las 06:00 AM, el modelo se re-entrena con todos los despachos observados hasta $t-1$.
+   - Se generan las predicciones corregidas fuera de muestra para los 4 horizontes ($D+1, D+2, D+3, D+4$).
+   - Se acumulan las predicciones y se comparan contra la demanda real observada.
+3. **Muestra Fuera de Muestra (*Out-of-Time*):** Total de **708 pronósticos independientes**, evaluados bajo condiciones idénticas a la producción.
+"""))
+
+cells.append(nbf.v4.new_code_cell("""# 4.5 Ejecución del Rolling-Origin Backtest (Validación Temporal Estricta)
 backtester = RollingOriginBacktester(warmup_days=28)
 df_backtest_preds = backtester.run_backtest()
 df_comparison = backtester.generate_comparison_summary()
@@ -552,7 +637,8 @@ print(f"PÉRDIDA ASIMÉTRICA OPERATIVA (2.5x Spot):  {glob['asymmetric_loss_base
 print("="*75)
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 4.3 Tabla Comparativa Detallada: Baseline vs Modelo por Centro de Distribución
+cells.append(nbf.v4.new_code_cell("""# 4.6 Tablas Comparativas Detalladas: Por Centro de Distribución y por Horizonte
+print("1. Comparativa por Centro de Distribución:")
 df_cd_comp = df_comparison[df_comparison["nivel"] == "centro"][
     ["centro_distribucion", "n_obs", "wape_baseline", "wape_modelo", "delta_wape_pp", "bias_baseline", "bias_modelo", "asymmetric_loss_baseline", "asymmetric_loss_modelo"]
 ].copy().sort_values("centro_distribucion")
@@ -566,9 +652,8 @@ display(df_cd_comp.style.format({
     "asymmetric_loss_baseline": "{:.2%}",
     "asymmetric_loss_modelo": "{:.2%}"
 }))
-"""))
 
-cells.append(nbf.v4.new_code_cell("""# 4.4 Tabla Comparativa Detallada: Baseline vs Modelo por Horizonte de Planificación
+print("\\n2. Comparativa por Horizonte de Planificación:")
 df_hz_comp = df_comparison[df_comparison["nivel"] == "horizonte"][
     ["horizonte", "n_obs", "wape_baseline", "wape_modelo", "delta_wape_pp", "bias_baseline", "bias_modelo", "asymmetric_loss_baseline", "asymmetric_loss_modelo"]
 ].copy().sort_values("horizonte")
@@ -584,14 +669,42 @@ display(df_hz_comp.style.format({
 }))
 """))
 
-cells.append(nbf.v4.new_markdown_cell(r"""### 4.5. Criterio Técnico y Honestidad Analítica
-1. **Desempeño en D+4:**
+cells.append(nbf.v4.new_code_cell("""# 4.7 Inspección de Coeficientes e Importancia de Variables del Modelo Corrector
+df_imp = backtester.df_feature_importance.head(10).copy()
+
+plt.figure(figsize=(9, 4.5))
+colors = ["#2ecc71" if c > 0 else "#e74c3c" for c in df_imp["raw_coefficient"]]
+plt.barh(df_imp["feature"][::-1], df_imp["raw_coefficient"][::-1], color=colors[::-1], edgecolor="black", alpha=0.85)
+plt.axvline(0, color="black", linestyle="--", linewidth=1.0)
+plt.title("Top Coeficientes del Modelo Corrector (Ridge L2): Ajuste Aditivo por Variable", fontweight="bold", fontsize=11)
+plt.xlabel("Impacto Aditivo en Unidades Despachadas (Coeficiente Beta)")
+plt.tight_layout()
+plt.show()
+
+print("Tabla de Coeficientes e Importancia de Variables:")
+display(df_imp.style.format({
+    "importance": "{:.2f}",
+    "raw_coefficient": "{:+.2f}"
+}))
+"""))
+
+cells.append(nbf.v4.new_markdown_cell(r"""### 4.8. Criterio Técnico, Honestidad Analítica y Selección de Modelo
+
+1. **Interpretación de los Coeficientes del Modelo:**
+   - `centro_distribucion_CD_SUR` (+292.68 unid.): El modelo aprendió a sumar sistemáticamente ~293 unidades a las predicciones de CD_SUR, neutralizando con precisión su subestimación crónica (+31.1% en Tarea 1).
+   - `centro_distribucion_CD_CENTRO` (-211.45 unid.) y `CD_PACIFICO` (-97.14 unid.): Coeficientes fuertemente negativos que descuentan unidades para erradicar la sobreestimación crónica.
+   - `ratio_base_to_mean7` (-235.58 unid.): Si el baseline se aleja hacia arriba respecto al promedio móvil reciente, el modelo aplica un factor corrector inmediato a la baja.
+   - `es_martes` (+139.46 unid.) e interacción `CD_SUR_x_martes` (+212.54 unid.): Capturan y compensan el pico semanal de compras detectado en la Tarea 2.
+
+2. **Comportamiento en D+4:**
    - El WAPE en D+4 disminuye drásticamente de **22.98% a 9.90%** ($-13.08$ pp), pero es el horizonte con menor precisión comparado con D+1 (5.76%).
-   - *Justificación Técnica:* A 4 días de anticipación, existe una incertidumbre irreducible derivada de órdenes fuera de plan que aún no se han emitido, la cual ningún modelo con datos pasados puede suprimir por completo.
-2. **Magnitud de Mejora en CD_NORTE:**
+   - *Justificación Técnica:* A 4 días de anticipación existe una incertidumbre irreducible derivada de órdenes fuera de plan que aún no se han colocado, la cual ningún modelo con datos pasados puede suprimir por completo.
+
+3. **Magnitud de Mejora en CD_NORTE:**
    - La mejora es de $2.94$ pp (de 9.59% a 6.64%), menor que en CD_SUR ($-24.66$ pp).
    - *Justificación Técnica:* CD_NORTE ya contaba con un pronóstico base razonablemente calibrado ($<10\%$). El modelo corrector regularizado actuó de forma conservadora sin sobreajustar ruido.
-3. **Decisión Arquitectural del Estimador: ¿Por qué Ridge Regression y no LightGBM / GBDT?**
+
+4. **Decisión Arquitectural del Estimador: ¿Por qué Ridge Regression y no LightGBM / GBDT?**
    - *Régimen de Datos Reducidos (Small Data Regime):* El historial abarca 59 fechas de emisión y 6 centros (~1,380 observaciones). En cada reentrenamiento del rolling backtest se cuenta con 612 a 1,332 filas con 26 covariables. Los modelos basados en árboles potenciados (LightGBM/GBDT) requieren miles de registros para calibrar divisiones estables en las hojas sin sobreajustar o generar varianza excesiva en los nodos terminales.
    - *Estructura Aditiva del Residuo:* El error del baseline $\epsilon = y - \hat{y}_{\text{base}}$ consiste en sesgos estructurales de nivel por centro logístico (+31.1% en CD_SUR, -22.5% en CD_PACIFICO) y estacionalidades semanales regulares (martes). Ridge modela estas correcciones aditivas de forma exacta y continua sin artefactos no lineales ruidosos.
    - *Falta de Extrapolación de GBDT vs. Continuidad Lineal:* Los árboles de decisión son funciones constantes a trozos (*piecewise constant*) incapaces de extrapolar si el nivel de demanda reciente cae fuera del rango visto en warmup. Ridge preserva proporcionalidad sin introducir discontinuidades escalonadas en los despachos.

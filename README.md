@@ -210,9 +210,11 @@ jupyter notebook notebooks/01_analisis_y_modelado_e2e.ipynb
 ---
 
 ### Tarea 3: Modelo Complementario de Forecast
-- **Enfoque Residual:** Se modela el error $\widehat{\epsilon} = f(X)$ mediante regresión regularizada $L_2$ (Ridge con $\alpha=10.0$):
-  $$\widehat{y}_{\text{corregido}} = \max\left(0, \; \widehat{y}_{\text{base}} + \widehat{\epsilon}\right)$$
-- **Zero Data Leakage:** Las características móviles (`mean_7d`, `mean_14d`, `mean_21d`, `std_7d`, `ratio_base_to_mean7`) se calculan con datos cerrados antes de `fecha_emision`.
+- **Ingeniería de Características Explícita (26 covariables):**
+  - *Día de la semana y calendario:* `dia_semana_despacho`, `es_lunes`, `es_fin_de_semana`, `dia_mes`.
+  - *Indicadores de picos de demanda:* `es_martes` (46.2% del volumen) e interacciones cruzadas por centro (`centro_distribucion_X_x_martes`).
+  - *Métricas móviles (Rolling Features) con Zero Data Leakage:* Medias y desviaciones estándar a 7, 14 y 21 días calculadas estrictamente con despachos cerrados antes de las 06:00 AM de `fecha_emision` ($\text{fecha\_despacho} < \text{fecha\_emision}$).
+  - *Señales de baseline y CD:* `unidades_pronosticadas`, `horizonte_num`, `ratio_base_to_mean7` y dummies por CD para absorber sesgos estructurales de nivel.
 - **Resultados del Rolling-Origin Backtest (708 observaciones out-of-time):**
   - **WAPE Global:** Cae de **20.73% a 7.28%** (**-13.45 pp**, reducción del 64.9%).
   - **Bias Global:** Cae de **+6.69% a +0.69%**.

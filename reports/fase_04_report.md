@@ -109,17 +109,30 @@ donde $\widehat{\epsilon} = f(X)$ predice analíticamente el residuo del baselin
 2. **Restricción de No-Negatividad Física:** El operador $\max(0, \cdot)$ garantiza que jamás se generen órdenes negativas de despacho.
 3. **Estabilidad y Rapidez:** Emplea regularización $L_2$ (Ridge con $\alpha=10.0$) que previene el sobreajuste ante muestras de 60 días y produce inferencia sub-milisegundo.
 
-### 3.2. Prevención Rigurosa de Data Leakage
-Un error común en forecasting logístico es calcular medias móviles usando la fecha de despacho o la demanda del mismo día de emisión. En nuestra arquitectura:
-- El pronóstico para `fecha_despacho` se emite en `fecha_emision`.
-- Las métricas móviles (`mean_7d`, `mean_14d`, `mean_21d`, `std_7d`) se calculan **estrictamente con las fechas de despacho cerradas antes de `fecha_emision`** ($\text{fecha\_despacho} < \text{fecha\_emision}$).
-- Cero filtración temporal: el modelo opera con la misma información que existiría en la bodega a las 06:00 AM del día de emisión.
+### 3.2. Desglose de Ingeniería de Características (Feature Engineering)
+Para responder con máxima profundidad a los requerimientos del desafío (*día de la semana, indicadores de picos de demanda y métricas móviles*), se construyeron 26 variables predictoras organizadas en cuatro familias analíticas:
 
-### 3.3. Top 5 Características Más Determinantes
-1. **Dummies de Centro de Distribución:** Capturan el desfase geográfico permanente (peso negativo para CD_CENTRO/CD_OESTE/CD_PACIFICO y positivo para CD_SUR/CD_ESTE).
-2. **Interacciones `centro_distribucion_x_martes`:** Ajustan el pico explosivo del martes específicamente en CD_NORTE y CD_SUR.
-3. **Móvil 7 días (`mean_7d`):** Provee el nivel reciente de operación del centro.
-4. **Ratio Pronóstico a Media Móvil (`ratio_base_to_mean7`):** Identifica cuando el baseline se desalinea de la tendencia observada.
+1. **Variables de Calendario y Estacionalidad Intra-semanal:**
+   - `dia_semana_despacho`: Entero de 0 (Lunes) a 6 (Domingo).
+   - `es_lunes`, `es_fin_de_semana`: Banderas binarias que capturan el arranque de semana y la caída de actividad los fines de semana.
+   - `dia_mes`: Día del mes (1 a 31), capturando ciclos de reposición o facturación quincenal/mensual.
+2. **Indicadores de Picos de Demanda e Interacciones Espacio-Temporales:**
+   - `es_martes`: Bandera binaria (1/0) derivada directamente del hallazgo de la Tarea 2 donde se evidenció que los martes concentran el 46.2% de los despachos.
+   - `centro_distribucion_X_x_martes`: Interacciones cruzadas entre la dummy de cada centro y el martes pico. Permite al estimador ajustar con mayor magnitud a bodegas críticas como CD_NORTE y CD_SUR.
+3. **Métricas Móviles (Rolling Features) con Control de Cero Filtración (*Zero Data Leakage*):**
+   - Medias (`mean_7d`, `mean_14d`, `mean_21d`) y dispersión (`std_7d`, `std_14d`, `std_21d`) sobre 1, 2 y 3 ciclos semanales retrospectivos.
+   - **Protocolo de Causalidad:** Para un pronóstico emitido a las 06:00 AM del día $t$, solo se usan despachos con $\text{fecha\_despacho} < \text{fecha\_emision}$, emulando la realidad física de la bodega.
+4. **Señales de Discrepancia del Baseline y Desfases Geográficos:**
+   - `unidades_pronosticadas`: Nivel propuesto por el baseline.
+   - `horizonte_num`: Horizonte temporal ($1, 2, 3, 4$).
+   - `ratio_base_to_mean7`: Cociente $\frac{\hat{y}_{\text{base}}}{\mu_7}$ que alerta cuando el baseline se descalibra respecto al promedio reciente.
+   - `centro_distribucion_X`: Dummies que absorben los sesgos crónicos fijos de nivel por centro logístico.
+
+### 3.3. Top Características Más Determinantes y Coeficientes Aprendidos
+1. **Dummies de Centro de Distribución:** `CD_SUR` (+292.68 unid.) corrige la subestimación crónica (+31.1% de error base); `CD_CENTRO` (-211.45 unid.) y `CD_PACIFICO` (-97.14 unid.) corrigen la sobreestimación crónica.
+2. **Ratio Pronóstico a Media Móvil (`ratio_base_to_mean7`):** Coeficiente de -235.58 unid., que frena al baseline cuando sobreestima la tendencia reciente.
+3. **Interacciones `CD_SUR_x_martes` (+212.54 unid.) y `es_martes` (+139.46 unid.):** Absorben el impacto asimétrico del pico de martes en la zona sur.
+4. **Métricas Móviles Recientes (`mean_7d`, `mean_14d`):** Proveen el ancla de nivel operativo por centro.
 5. **Horizonte Numérico (`horizonte_num`):** Modula la dispersión esperada a medida que nos alejamos de D+1 a D+4.
 
 ---
