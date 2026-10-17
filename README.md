@@ -217,9 +217,10 @@ jupyter notebook notebooks/01_analisis_y_modelado_e2e.ipynb
   - **WAPE Global:** Cae de **20.73% a 7.28%** (**-13.45 pp**, reducción del 64.9%).
   - **Bias Global:** Cae de **+6.69% a +0.69%**.
   - **Pérdida Asimétrica:** Cae de **41.30% a 13.26%** (**-28.04 pp**).
-- **Honestidad Técnica:**
+- **Honestidad Técnica y Selección de Modelo (Ridge vs. LightGBM):**
   - En D+4 el WAPE resultante es 9.90% frente al 5.76% en D+1 debido a la incertidumbre temporal irreducible a 4 días.
   - En CD_NORTE la mejora es moderada (-2.94 pp, de 9.59% a 6.64%) porque el baseline ya era aceptable, evitando el sobreajuste.
+  - **¿Por qué Ridge y no LightGBM?:** El tamaño muestral (59 fechas, 600–1,300 filas en train) favorece modelos lineales regularizados analíticos ($\mathbf{w}^* = (\mathbf{X}^T\mathbf{X} + \alpha\mathbf{I})^{-1}\mathbf{X}^T\boldsymbol{\epsilon}$) sobre árboles de decisión con riesgo de sobreajuste y discontinuidades escalonadas. Empíricamente, LightGBM solo aportó una ganancia marginal (+0.14 pp de WAPE) con mayor inestabilidad de bias (+0.95% vs +0.69%). La arquitectura es agnóstica (`BaseEstimator`) y admite migrar a LightGBM en Fase 2 (12–24 meses con promociones/clima).
 
 ---
 

@@ -33,7 +33,7 @@ cells.append(nbf.v4.new_markdown_cell("""# Desafío Técnico: Data Scientist Lea
 4. **Tarea 3: Modelo Complementario de Forecast y Rolling Backtest:**
    - Ingeniería de características con control estricto de *Zero Data Leakage*.
    - Arquitectura residual regularizada ($L_2$ Ridge) con restricción física de no-negatividad.
-   - Evaluación fuera de muestra (*out-of-time*) con origen rodante y reporte de honestidad técnica.
+   - Evaluación fuera de muestra (*out-of-time*) con origen rodante, justificación de modelo (Ridge vs. LightGBM) y reporte de honestidad técnica.
 5. **Tarea 4: Regla de Resiliencia Operativa (Cold Start / Gate de 45 Días):**
    - Implementación del `DataCoverageGate` y prueba de tolerancia a fallos.
    - Justificación matemática del umbral de 45 días continuos y análisis de sensibilidad de umbrales.
@@ -591,6 +591,14 @@ cells.append(nbf.v4.new_markdown_cell(r"""### 4.5. Criterio Técnico y Honestida
 2. **Magnitud de Mejora en CD_NORTE:**
    - La mejora es de $2.94$ pp (de 9.59% a 6.64%), menor que en CD_SUR ($-24.66$ pp).
    - *Justificación Técnica:* CD_NORTE ya contaba con un pronóstico base razonablemente calibrado ($<10\%$). El modelo corrector regularizado actuó de forma conservadora sin sobreajustar ruido.
+3. **Decisión Arquitectural del Estimador: ¿Por qué Ridge Regression y no LightGBM / GBDT?**
+   - *Régimen de Datos Reducidos (Small Data Regime):* El historial abarca 59 fechas de emisión y 6 centros (~1,380 observaciones). En cada reentrenamiento del rolling backtest se cuenta con 612 a 1,332 filas con 26 covariables. Los modelos basados en árboles potenciados (LightGBM/GBDT) requieren miles de registros para calibrar divisiones estables en las hojas sin sobreajustar o generar varianza excesiva en los nodos terminales.
+   - *Estructura Aditiva del Residuo:* El error del baseline $\epsilon = y - \hat{y}_{\text{base}}$ consiste en sesgos estructurales de nivel por centro logístico (+31.1% en CD_SUR, -22.5% en CD_PACIFICO) y estacionalidades semanales regulares (martes). Ridge modela estas correcciones aditivas de forma exacta y continua sin artefactos no lineales ruidosos.
+   - *Falta de Extrapolación de GBDT vs. Continuidad Lineal:* Los árboles de decisión son funciones constantes a trozos (*piecewise constant*) incapaces de extrapolar si el nivel de demanda reciente cae fuera del rango visto en warmup. Ridge preserva proporcionalidad sin introducir discontinuidades escalonadas en los despachos.
+   - *Estabilidad Analítica y Costo Operacional:* Ridge resuelve una inversión en forma cerrada $\mathbf{w}^* = (\mathbf{X}^T \mathbf{X} + \alpha \mathbf{I})^{-1} \mathbf{X}^T \boldsymbol{\epsilon}$ en $< 1$ ms por reentrenamiento diario, eliminando la necesidad de afinamiento estocástico de hiperparámetros (learning rate, depth, min_child_samples, early stopping).
+   - *Interpretabilidad Operativa:* Coeficientes lineales auditables para la gerencia logística ante penalizaciones asimétricas severas ($2.5\times$ en fletes spot).
+   - *Validación Empírica Comparada:* Ridge obtiene WAPE **7.28%** y Bias **+0.69%**. LightGBM Default alcanza **7.14%** (ganancia marginal de apenas 0.14 pp) con mayor dispersión de bias (+0.95%) y susceptibilidad a la poda (9.02% en shallow). La ganancia marginal no compensa la complejidad operativa ni el riesgo de overfitting.
+   - *Extensibilidad:* La clase `ResidualDemandCorrector` implementa compatibilidad con `BaseEstimator` de scikit-learn, garantizando una transición inmediata a LightGBM en una Fase 2 cuando se cuente con 12–24 meses e información exógena compleja (promociones, clima, SKUs).
 """))
 
 # Section 5: Tarea 4

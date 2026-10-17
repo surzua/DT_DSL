@@ -51,6 +51,14 @@ Este compendio consolida todas las definiciones formales, formulaciones matemát
   $$\text{WAPE: } 20.73\% \to \mathbf{7.28\%} \quad (-13.45 \text{ pp, } -64.88\%)$$
   $$\text{Bias: } +6.69\% \to \mathbf{+0.69\%} \quad (-6.00 \text{ pp, sesgo erradicado})$$
   $$\mathcal{L}_{\text{asym}}: 41.30\% \to \mathbf{13.26\%} \quad (-28.04 \text{ pp, } -67.89\%)$$
+- **Justificación de Diseño Arquitectónico (Ridge vs. LightGBM / GBDT):**
+  * *Régimen de Datos Reducidos (*Small Data*):* En las 31 ventanas rodantes se entrenan entre 612 y 1,332 filas con 26 covariables. Los modelos basados en árboles potenciados (LightGBM) tienden a sobreajustar o crear particiones rígidas cuando el volumen de datos es pequeño.
+  * *Estructura Aditiva del Residuo:* El error del baseline obedece a sesgos de nivel por centro logístico (+31.1% en CD_SUR, -22.5% en CD_PACIFICO) y picos de día de semana (martes). Ridge modela estas correcciones aditivas de forma exacta y continua sin artefactos no lineales ruidosos.
+  * *Extrapolación vs. Funciones Escalonadas:* Los árboles de decisión son funciones constantes a trozos (*piecewise constant*) incapaces de extrapolar si las variables de nivel caen fuera del rango visto en warmup. Ridge preserva proporcionalidad lineal sin truncamiento.
+  * *Costo y Estabilidad Operacional:* Ridge resuelve una inversión analítica de forma cerrada en $< 1$ ms por reentrenamiento diario, eliminando la necesidad de afinamiento estocástico de hiperparámetros (learning rate, depth, min_child_samples, early stopping).
+  * *Interpretabilidad y Auditoría:* Coeficientes lineales auditables para la gerencia logística ante penalizaciones asimétricas de 2.5x en fletes spot.
+  * *Validación Empírica Comparada:* Ridge obtiene WAPE **7.28%** y Bias **+0.69%**. LightGBM Default alcanza **7.14%** (ganancia marginal de apenas 0.14 pp) con mayor dispersión de bias (+0.95%) y susceptibilidad a la poda (9.02% en shallow).
+  * *Extensibilidad:* La clase `ResidualDemandCorrector` implementa la interfaz `BaseEstimator` de scikit-learn, garantizando compatibilidad plug-and-play para activar LightGBM en Fase 2 una vez acumulados 12–24 meses con variables exógenas complejas.
 
 ### 1.4. Resiliencia, Racha Continua y Regla de Cold Start (Tarea 4)
 - **Racha de Días Continuos sin Gaps:**
