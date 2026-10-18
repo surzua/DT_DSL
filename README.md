@@ -2,7 +2,7 @@
 ## Optimización Logística y Corrección Analítica de Pronóstico de Demanda B2B
 
 ![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)
-![Coverage](https://img.shields.io/badge/tests-16%20passed%20%7C%20100%25-brightgreen.svg)
+![Coverage](https://img.shields.io/badge/tests-20%20passed%20%7C%20100%25-brightgreen.svg)
 ![WAPE Reduction](https://img.shields.io/badge/WAPE-20.7%25%20%E2%86%92%207.3%25-success.svg)
 ![Bias](https://img.shields.io/badge/Bias-%2B6.7%25%20%E2%86%92%20%2B0.7%25-success.svg)
 ![Architecture](https://img.shields.io/badge/cloud-AWS%20Serverless%20%26%20ECS-orange.svg)
@@ -30,12 +30,12 @@ El proyecto sigue una arquitectura modular en Python 3.11+, con tipado estricto,
 ```text
 DT_DSL/
 ├── data/
-│   ├── raw/                                  # Datasets crudos de entrada (CSV)
+│   ├── raw/                                  # Datasets crudos de entrada (CSV requeridos para reproducción)
 │   │   ├── capacidad_logistica_generica.csv
 │   │   ├── pedidos_historicos_genericos.csv
 │   │   ├── plan_entrega_clientes_generico.csv
 │   │   └── pronostico_demanda_generico.csv
-│   └── processed/                            # Artefactos procesados y serializados
+│   └── processed/                            # Tablas intermedias validadas y frozen benchmarks
 │       ├── demanda_real_agregada.parquet     # Demanda consolidada diaria por CD
 │       ├── pronostico_base_limpio.parquet    # Cruce 100% inner match con demanda
 │       ├── capacidad_logistica_limpia.parquet
@@ -45,23 +45,19 @@ DT_DSL/
 │       ├── saturacion_capacidad_cd.csv       # Días y unidades excedidas por CD
 │       ├── backtest_results_comparison.csv   # Comparativa oficial Modelo vs Baseline
 │       └── sensibilidad_gate_dias.csv        # Simulación de umbrales de resiliencia
+├── docs/
+│   ├── MODEL_CARD.md                         # Ficha de gobernanza, reproducibilidad y drift del modelo
+│   └── architecture_aws.md                   # Blueprint técnico conceptual de arquitectura en AWS (Tarea 5)
 ├── notebooks/
-│   └── 01_analisis_y_modelado_e2e.ipynb      # Cuaderno integral ejecutable con visualizaciones
+│   └── 01_analisis_y_modelado_e2e.ipynb      # Cuaderno integral ejecutable con tareas 1 a 5 y outputs
 ├── presentation/
-│   └── deck_ejecutivo_data_scientist_lead.pdf # Presentación ejecutiva de 10 diapositivas para C-Level
+│   └── deck_ejecutivo_9_slides.pdf           # Presentación ejecutiva oficial (9 diapositivas formato McKinsey)
 ├── reports/
-│   ├── fase_01_report.md                     # Reporte Setup, Data Contracts y Pipeline Base
-│   ├── fase_02_report.md                     # Reporte Auditoría Baseline (Tarea 1)
-│   ├── fase_03_report.md                     # Reporte Plan de Entrega y Capacidad (Tarea 2)
-│   ├── fase_04_report.md                     # Reporte Features y Rolling Backtest (Tarea 3)
-│   ├── fase_05_report.md                     # Reporte Resiliencia Cold Start (Tarea 4)
-│   ├── fase_06_report.md                     # Reporte Arquitectura Cloud AWS (Tarea 5)
-│   ├── fase_07_report.md                     # Reporte Final y Consolidación
 │   └── figures/                              # Gráficos generados en alta resolución (PNG 300 dpi)
 │       ├── fase_02/                          # Heatmaps WAPE/Bias, degradación temporal
 │       ├── fase_03/                          # Desvíos temporales, saturación por CD
 │       ├── fase_04/                          # Comparativa WAPE/Bias, importancia variables
-│       └── fase_05/                          # Sensibilidad umbral días, flujo de decisión
+│       └── fase_05/                          # Sensibilidad umbral días, flujo decisión, diagrama AWS
 ├── src/
 │   ├── data/
 │   │   ├── schemas.py                        # Esquemas Pydantic y Data Contracts
@@ -83,10 +79,8 @@ DT_DSL/
 │   ├── test_delivery_plan.py                 # Tests de plan comercial y saturación
 │   ├── test_models.py                        # Tests de pipeline, corrector y backtest
 │   └── test_resilience.py                    # Tests de resiliencia y cold start
-├── scripts/
-│   ├── create_notebook.py                    # Generador del notebook reproducible
-│   └── generate_deck.py                      # Generador del PDF ejecutivo (ReportLab)
 ├── Dockerfile                                # Entorno contenedorizado completo
+├── Makefile                                  # Automatización de tareas (test, lint, run)
 ├── pyproject.toml                            # Configuración del paquete y dependencias (uv / pip)
 ├── requirements.txt                          # Dependencias congeladas deterministas
 └── README.md                                 # Documentación principal
@@ -152,8 +146,8 @@ python -m src.models.backtest
 # 5. Tarea 4: Resiliencia Cold Start (genera sensibilidad_gate_dias.csv)
 python -m src.resilience.gate
 
-# 6. Compilar presentación ejecutiva en PDF (10 diapositivas C-Level)
-python scripts/generate_deck.py
+# 6. Compilar presentación ejecutiva en PDF (9 diapositivas formato McKinsey)
+make deck
 ```
 
 ### Ejecución del Notebook E2E
@@ -282,8 +276,9 @@ tests/test_resilience.py::test_sensitivity_artifact_exists PASSED        [100%]
 
 ## 7. Entregables Formales Generados
 
-1. **Código Fuente Modular:** `src/` (Python 3.11+, tipado, validado con Pydantic y documentado).
-2. **Entorno y Contenerización:** `pyproject.toml`, `requirements.txt` y `Dockerfile`.
-3. **Notebook Reproducible E2E:** [`notebooks/01_analisis_y_modelado_e2e.ipynb`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/notebooks/01_analisis_y_modelado_e2e.ipynb) (ejecutado con salidas embebidas y gráficos).
-4. **Deck Ejecutivo en PDF:** [`presentation/deck_ejecutivo_data_scientist_lead.pdf`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/presentation/deck_ejecutivo_data_scientist_lead.pdf) (10 diapositivas para C-Level).
-5. **Especificación de Arquitectura Cloud:** [`docs/architecture_aws.md`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/docs/architecture_aws.md) y [`reports/fase_06_report.md`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/reports/fase_06_report.md).
+1. **Código Fuente Modular:** [`src/`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/src) (Python 3.11+, tipado, validado con Pydantic y documentado).
+2. **Entorno y Contenerización:** [`pyproject.toml`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/pyproject.toml), [`requirements.txt`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/requirements.txt), [`Dockerfile`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/Dockerfile) y [`Makefile`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/Makefile).
+3. **Notebook Reproducible E2E:** [`notebooks/01_analisis_y_modelado_e2e.ipynb`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/notebooks/01_analisis_y_modelado_e2e.ipynb) (ejecutado con salidas embebidas y gráficos para las 5 tareas).
+4. **Deck Ejecutivo en PDF:** [`presentation/deck_ejecutivo_9_slides.pdf`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/presentation/deck_ejecutivo_9_slides.pdf) (9 diapositivas formato McKinsey para C-Level respondiendo exactamente la estructura solicitada).
+5. **Especificación de Arquitectura Cloud:** [`docs/architecture_aws.md`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/docs/architecture_aws.md) y [`docs/MODEL_CARD.md`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/docs/MODEL_CARD.md).
+

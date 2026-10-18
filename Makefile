@@ -21,7 +21,7 @@ notebook:
 	uv run jupyter nbconvert --to notebook --execute --inplace notebooks/01_analisis_y_modelado_e2e.ipynb
 
 deck:
-	uv run python scripts/generate_deck.py
+	uv run python scripts/generate_deck_9_slides.py
 
 all: test notebook deck
 	@echo "[OK] Pipeline completo ejecutado con éxito."

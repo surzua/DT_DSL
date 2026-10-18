@@ -1,7 +1,4 @@
-# Project specific
-docs/
-
-# Python
+# Python artifacts
 __pycache__/
 *.py[cod]
 *$py.class
@@ -23,6 +20,11 @@ wheels/
 .installed.cfg
 *.egg
 
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
 # Virtual Environments
 .env
 .venv
@@ -41,3 +43,23 @@ ENV/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Office & PowerPoint temporary/source files
+~$*
+presentation/~*
+presentation/*.pptx
+
+# Auxiliary presentation artifacts (previews & drafting prompts)
+presentation/slides_preview/
+presentation/PROMPT_*.md
+
+# Generator & build scripts (reproducibility utilities kept locally)
+scripts/
+
+# Intermediate phase markdown reports (development logs)
+reports/*.md
+
+# Internal test prompt & scratch docs
+docs/*.pdf
+docs/*.html
+docs/ROADMAP.md
