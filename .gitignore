@@ -48,13 +48,16 @@ Thumbs.db
 ~$*
 presentation/~*
 presentation/*.pptx
+!presentation/deck_ejecutivo_10_slides.pptx
 
 # Auxiliary presentation artifacts (previews & drafting prompts)
 presentation/slides_preview/
 presentation/PROMPT_*.md
 
 # Generator & build scripts (reproducibility utilities kept locally)
-scripts/
+scripts/*
+!scripts/generate_pdf_deck_10_slides.py
+!scripts/generate_pptx_deck_10_slides.py
 
 # Intermediate phase markdown reports (development logs)
 reports/*.md

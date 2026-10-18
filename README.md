@@ -51,7 +51,8 @@ DT_DSL/
 ├── notebooks/
 │   └── 01_analisis_y_modelado_e2e.ipynb      # Cuaderno integral ejecutable con tareas 1 a 5 y outputs
 ├── presentation/
-│   └── deck_ejecutivo_9_slides.pdf           # Presentación ejecutiva oficial (9 diapositivas formato McKinsey)
+│   ├── deck_ejecutivo_10_slides.pdf          # Presentación ejecutiva oficial (10 diapositivas técnicas en PDF)
+│   └── deck_ejecutivo_10_slides.pptx         # Presentación ejecutiva en PowerPoint (16:9 Widescreen)
 ├── reports/
 │   └── figures/                              # Gráficos generados en alta resolución (PNG 300 dpi)
 │       ├── fase_02/                          # Heatmaps WAPE/Bias, degradación temporal
@@ -146,7 +147,7 @@ python -m src.models.backtest
 # 5. Tarea 4: Resiliencia Cold Start (genera sensibilidad_gate_dias.csv)
 python -m src.resilience.gate
 
-# 6. Compilar presentación ejecutiva en PDF (9 diapositivas formato McKinsey)
+# 6. Compilar presentación ejecutiva oficial (PDF y PPTX de 10 diapositivas)
 make deck
 ```
 
@@ -279,6 +280,6 @@ tests/test_resilience.py::test_sensitivity_artifact_exists PASSED        [100%]
 1. **Código Fuente Modular:** [`src/`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/src) (Python 3.11+, tipado, validado con Pydantic y documentado).
 2. **Entorno y Contenerización:** [`pyproject.toml`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/pyproject.toml), [`requirements.txt`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/requirements.txt), [`Dockerfile`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/Dockerfile) y [`Makefile`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/Makefile).
 3. **Notebook Reproducible E2E:** [`notebooks/01_analisis_y_modelado_e2e.ipynb`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/notebooks/01_analisis_y_modelado_e2e.ipynb) (ejecutado con salidas embebidas y gráficos para las 5 tareas).
-4. **Deck Ejecutivo en PDF:** [`presentation/deck_ejecutivo_9_slides.pdf`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/presentation/deck_ejecutivo_9_slides.pdf) (9 diapositivas formato McKinsey para C-Level respondiendo exactamente la estructura solicitada).
+4. **Deck Ejecutivo Oficial:** [`presentation/deck_ejecutivo_10_slides.pdf`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/presentation/deck_ejecutivo_10_slides.pdf) y versión PowerPoint [`presentation/deck_ejecutivo_10_slides.pptx`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/presentation/deck_ejecutivo_10_slides.pptx) (10 diapositivas técnicas respondiendo de forma exhaustiva las 5 tareas del desafío).
 5. **Especificación de Arquitectura Cloud:** [`docs/architecture_aws.md`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/docs/architecture_aws.md) y [`docs/MODEL_CARD.md`](file:///Users/sebastianfelipeurzuaborquez/Proyectos/DT_DSL/docs/MODEL_CARD.md).
 
