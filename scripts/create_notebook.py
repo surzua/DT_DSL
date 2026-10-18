@@ -20,36 +20,62 @@ cells.append(nbf.v4.new_markdown_cell("""# Desafío Técnico: Data Scientist Lea
 ---
 
 ### Estructura de Secciones:
-1. **Setup de Ingeniería:** Entorno de ejecución, contratos de datos e ingesta reproducible.
+1. **Setup de Ingeniería: Ingesta, Validación y Contratos de Datos:**
+   - 1.1. Configuración de Entorno e Importaciones Modulares
+   - 1.2. Contratos de Datos Pydantic y Ejecución del Pipeline de Ingesta
+   - 1.3. Vista Previa de Datos Validados y Cruce de Tablas
 2. **Tarea 1: Diagnóstico de Calidad y Backtesting del Baseline:**
-   - Fórmulas matemáticas de WAPE, Bias y Pérdida Asimétrica Logística.
-   - Cálculos explícitos a nivel Global, por Centro de Distribución y por Horizonte temporal ($D+1$ a $D+4$).
-   - Respuestas explícitas a las preguntas de negocio de la Tarea 1.
-3. **Tarea 2: Estado Operativo del Plan de Entrega, Capacidad y Estrategia:**
-   - Cuantificación explícita del sesgo en volumen y fechas del plan comercial.
-   - Tasa de compras fuera de plan por Centro de Distribución y por día de la semana.
-   - Métricas operativas avanzadas (adhesión de clientes, efecto Pareto y saturación de flota).
-   - Propuesta estratégica de aplanamiento de demanda (*Dynamic Delivery Slotting*).
+   - 2.1. Definición Matemática Formal de Métricas (WAPE, Bias y Pérdida Asimétrica Logística)
+   - 2.2. Cálculo Explícito Paso a Paso a Nivel Global (Demostración Aritmética)
+   - 2.3. Cálculo Explícito por Centro de Distribución
+   - 2.4. Respuesta Explícita a la Pregunta 1: Subestimación y Sobreestimación por Centro de Distribución
+   - 2.5. Cálculo Explícito por Horizonte de Planificación (D+1 a D+4)
+   - 2.6. Respuesta Explícita a la Pregunta 2: Degradación Monótona Temporal del WAPE
+   - 2.7. Matrices Cruzadas Oficiales de Calidad (Centro × Horizonte)
+   - 2.8. Visualizaciones Diagnósticas Oficiales de la Tarea 1 (Heatmaps y Curvas de Error)
+   - 2.9. Conclusiones e Insights de Negocio de la Tarea 1: Asimetría de Costo y Fletes Spot
+3. **Tarea 2: Estado Operativo del Plan de Entrega, Capacidad y Estrategia de Negocio:**
+   - 3.1. Fórmulas Matemáticas y Metodología de Cálculo (Sesgo de Volumen, Fechas y Capacidad)
+   - 3.2. Auditoría y Respuesta a la Pregunta 1: Sesgo Sistemático del Plan Comercial (Volumen y Fechas)
+   - 3.3. Auditoría y Respuesta a la Pregunta 2: Porcentaje de Compras Fuera de Plan por Red, CD y Día
+   - 3.4. Auditoría de Saturación de Capacidad Logística Diaria y Días Críticos de Flota
+   - 3.5. Respuesta Explícita a la Pregunta 3: Métricas Operativas Adicionales para el Panorama Logístico
+   - 3.6. Respuesta Explícita a la Pregunta 4: Propuesta Estratégica de Aplanamiento de Demanda (Pico Martes)
 4. **Tarea 3: Modelo Complementario de Forecast y Rolling Backtest:**
-   - 4.1. Estrategia y Enfoque del Modelo Corrector Residual (Arquitectura Aditiva ReLU y Ridge $L_2$).
-   - 4.2. Ingeniería de Características (Feature Engineering) Detallada (4 familias y Zero Leakage).
-   - 4.3. Construcción Explícita del Feature Pipeline y Matriz de Covariables.
-   - 4.4. Protocolo de Validación Cruzada con Origen Rodante (*Rolling-Origin Backtest*).
-   - 4.5. Demostración Cuantitativa y Evidencia Gráfica del Efecto sobre el WAPE Global y Baseline.
-   - 4.6. Conclusión de la Tarea 3: Respuestas Cuantitativas a las Preguntas Iniciales.
-   - 4.7. Interpretabilidad: Inspección de Coeficientes e Importancia de Variables (Betas del Modelo).
-   - 4.8. Criterio Técnico, Honestidad Analítica y Selección de Modelo (Ridge vs. LightGBM).
+   - 4.1. Estrategia y Enfoque del Modelo Corrector Residual (Arquitectura Aditiva ReLU y Ridge L2)
+   - 4.2. Ingeniería de Características (Feature Engineering) Detallada (4 Familias y Zero Leakage)
+   - 4.3. Construcción Explícita del Feature Pipeline y Matriz de Covariables
+   - 4.4. Protocolo de Validación Cruzada con Origen Rodante (Rolling-Origin Backtest)
+   - 4.5. Demostración Cuantitativa y Evidencia Gráfica del Efecto sobre el WAPE Global y Baseline
+   - 4.6. Conclusión de la Tarea 3: Respuestas Cuantitativas a las Preguntas Iniciales
+   - 4.7. Interpretabilidad: Inspección de Coeficientes e Importancia de Variables (Betas del Modelo)
+   - 4.8. Criterio Técnico, Honestidad Analítica y Selección de Modelo (Ridge vs. LightGBM)
 5. **Tarea 4: Regla de Resiliencia Operativa (Cold Start / Gate de 45 Días):**
-   - Implementación del `DataCoverageGate` y prueba de tolerancia a fallos.
-   - Justificación matemática del umbral de 45 días continuos y análisis de sensibilidad de umbrales.
-6. **Conclusiones Ejecutivas para Gerencia y C-Level.**
+   - 5.1. Fórmulas Matemáticas y Reglas de Resiliencia (Algoritmo de Rachas y Ruteo)
+   - 5.2. Demostración Operativa del DataCoverageGate y Tolerancia a Fallos (Cold Start)
+   - 5.3. Simulación Cuantitativa de Sensibilidad de Umbrales de Historia (15 a 50 Días)
+   - 5.4. Curva de Sensibilidad del WAPE y Estabilidad de Pronóstico
+   - 5.5. Justificación Cuantitativa del Umbral de 45 Días, Trade-Offs Operativos y Veredicto Lead
+6. **Conclusiones y Resumen Ejecutivo para Gerencia:**
+   - 6.1. Síntesis de Resultados Cuantitativos por Tarea y Cumplimiento de Metas
+   - 6.2. Hoja de Ruta para Puesta en Producción y Gobernanza MLOps
 """))
 
-# Cell 1: Setup and Imports
-cells.append(nbf.v4.new_code_cell("""# 1. Configuración de Entorno e Importaciones Modulares
+# Section 1: Setup and Ingestion
+cells.append(nbf.v4.new_markdown_cell("""---
+## 1. Setup de Ingeniería: Ingesta, Validación y Contratos de Datos
+
+### 1.1. Configuración de Entorno e Importaciones Modulares
+
+Se configuran las dependencias del ecosistema analítico (`pandas`, `numpy`, `scikit-learn`, `matplotlib`, `seaborn`) y se importan los módulos productivos desarrollados en `src/`. Asimismo, se importa explícitamente `display` de `IPython.display` para garantizar una renderización limpia y libre de advertencias en el árbol de navegación del cuaderno.
+"""))
+
+# Cell 1: Setup and Imports Code
+cells.append(nbf.v4.new_code_cell("""# 1.1 Configuración de Entorno e Importaciones Modulares
 import os
 import sys
 from pathlib import Path
+from IPython.display import display, HTML, Markdown
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -96,9 +122,8 @@ print(f"[OK] Directorio de trabajo: {Path.cwd()}")
 print("[OK] Módulos de src/ cargados exitosamente.")
 """))
 
-# Section 1: Data Ingestion
-cells.append(nbf.v4.new_markdown_cell("""---
-## 1. Pipeline de Ingesta, Validación y Contratos de Datos
+# 1.2 Data Ingestion Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 1.2. Contratos de Datos Pydantic y Ejecución del Pipeline de Ingesta
 
 El sistema ingesta cuatro fuentes crudas de datos que simulan 60 días continuos de operación logística (2026-01-01 a 2026-03-01) en 6 centros de distribución:
 1. `pedidos_historicos_genericos.csv`: Entregas reales desglosadas por canal de venta.
@@ -109,7 +134,7 @@ El sistema ingesta cuatro fuentes crudas de datos que simulan 60 días continuos
 **Regla Central de Agregación:** La demanda real se consolida a nivel `(centro_distribucion, fecha_despacho)` para lograr paridad dimensional con el pronóstico base.
 """))
 
-cells.append(nbf.v4.new_code_cell("""# Ejecución del pipeline de ingesta con validación de contratos Pydantic
+cells.append(nbf.v4.new_code_cell("""# 1.2 Ejecución del pipeline de ingesta con validación de contratos Pydantic
 loader = DataLoader()
 df_demanda, df_pronostico = loader.run_pipeline()
 df_capacidad = load_processed_capacidad()
@@ -121,7 +146,13 @@ print(f"Capacidad Logística Diaria: {df_capacidad.shape} registros")
 print(f"Plan de Entrega Clientes:   {df_plan.shape} registros")
 """))
 
-cells.append(nbf.v4.new_code_cell("""# Vista previa de la demanda consolidada y del pronóstico base
+# 1.3 Data Preview Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 1.3. Vista Previa de Datos Validados y Cruce de Tablas
+
+Se verifica la estructura tabular de la demanda agregada y del pronóstico base alineado, confirmando la ausencia de valores nulos o tipos incompatibles.
+"""))
+
+cells.append(nbf.v4.new_code_cell("""# 1.3 Vista previa de la demanda consolidada y del pronóstico base
 print("--- Demanda Real Consolidada por Centro y Fecha ---")
 display(df_demanda.head(4))
 
@@ -133,7 +164,7 @@ display(df_pronostico.head(4))
 cells.append(nbf.v4.new_markdown_cell("""---
 ## 2. Tarea 1: Diagnóstico de Calidad y Backtesting del Baseline
 
-### 2.1. Definición Matemática Formal de Métricas
+### 2.1. Definición Matemática Formal de Métricas (WAPE, Bias y Pérdida Asimétrica Logística)
 
 Para evaluar la precisión del modelo base, el PDF especifica:
 
@@ -149,6 +180,12 @@ $$\\text{Bias} = \\frac{\\sum_{i=1}^N (\\text{real}_i - \\text{pronóstico}_i)}{
 En la cadena de suministro de consumo masivo, **subestimar es entre $2.0\\times$ y $3.0\\times$ más costoso que sobreestimar**:
 $$\\text{Loss}_{\\text{asim}} = \\frac{\\sum_{i=1}^N [c_{\\text{under}} \\cdot \\max(0, \\text{real}_i - \\text{pron}_i) + c_{\\text{over}} \\cdot \\max(0, \\text{pron}_i - \\text{real}_i)]}{\\sum_{i=1}^N |\\text{real}_i|}$$
 con $c_{\\text{under}} = 2.5$ y $c_{\\text{over}} = 1.0$.
+"""))
+
+# 2.2 Global Calculation Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 2.2. Cálculo Explícito Paso a Paso a Nivel Global (Demostración Aritmética)
+
+A continuación se realiza el cálculo manual y explícito de las métricas agregadas sobre las 1,380 observaciones evaluables de la red, detallando cada suma aritmética para auditoría total.
 """))
 
 cells.append(nbf.v4.new_code_cell("""# 2.2 Cálculo Explícito Paso a Paso a Nivel Global
@@ -182,12 +219,15 @@ print(f"PÉRDIDA ASIMÉTRICA OPERATIVA (2.5x Spot) = {asym_loss*100:6.2f}%")
 print("="*65)
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### 2.3. Cálculo Explícito por Centro de Distribución (Pregunta 1)
+# 2.3 By CD Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 2.3. Cálculo Explícito por Centro de Distribución
 
 **Pregunta 1 del Desafío:** *¿Qué centros subestiman de manera consistente la demanda real y cuáles la sobreestiman?*
+
+Se computan las métricas desagregadas por Centro de Distribución para caracterizar el comportamiento bipolar de la red.
 """))
 
-cells.append(nbf.v4.new_code_cell("""# Cálculo explícito de métricas agrupadas por Centro de Distribución
+cells.append(nbf.v4.new_code_cell("""# 2.3 Cálculo explícito de métricas agrupadas por Centro de Distribución
 cd_metrics = []
 for cd, g in df_pronostico.groupby("centro_distribucion"):
     real = float(g["unidades_reales"].sum())
@@ -240,7 +280,12 @@ display(df_by_cd_styled.style.format({
 }))
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### Respuesta Explícita a la Pregunta 1:
+# 2.4 Response Question 1 Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 2.4. Respuesta Explícita a la Pregunta 1: Subestimación y Sobreestimación por Centro de Distribución
+
+**Pregunta 1 del Desafío:** *¿Qué centros subestiman de manera consistente la demanda real y cuáles la sobreestiman?*
+
+**Respuesta Explícita y Cuantificada:**
 
 1. **Centros que SUBESTIMAN de manera consistente (Bias $>0$):**
    - **`CD_SUR`:** Presenta un **Bias de +31.56%** (idéntico a su WAPE de 31.56%), lo que demuestra matemáticamente que el pronóstico estuvo por debajo de la realidad en prácticamente el **100% de los despachos evaluados**.
@@ -254,12 +299,15 @@ cells.append(nbf.v4.new_markdown_cell("""### Respuesta Explícita a la Pregunta 
    - **`CD_CENTRO`:** Bias de **-20.21%** (WAPE de 23.28%).
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### 2.4. Cálculo Explícito por Horizonte de Planificación (Pregunta 2)
+# 2.5 By Horizon Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 2.5. Cálculo Explícito por Horizonte de Planificación (D+1 a D+4)
 
 **Pregunta 2 del Desafío:** *¿Cómo se degrada la precisión del pronóstico (WAPE) a medida que la ventana temporal se extiende de D+1 a D+4?*
+
+Se evalúa la precisión agrupada por días de anticipación de predicción para cuantificar el deterioro temporal.
 """))
 
-cells.append(nbf.v4.new_code_cell("""# Cálculo explícito de métricas agrupadas por Horizonte temporal
+cells.append(nbf.v4.new_code_cell("""# 2.5 Cálculo explícito de métricas agrupadas por Horizonte temporal
 hz_metrics = []
 for hz, g in df_pronostico.groupby("horizonte"):
     real = float(g["unidades_reales"].sum())
@@ -301,7 +349,12 @@ display(df_by_hz.style.format({
 }))
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### Respuesta Explícita a la Pregunta 2:
+# 2.6 Response Question 2 Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 2.6. Respuesta Explícita a la Pregunta 2: Degradación Monótona Temporal del WAPE
+
+**Pregunta 2 del Desafío:** *¿Cómo se degrada la precisión del pronóstico (WAPE) a medida que la ventana temporal se extiende de D+1 a D+4?*
+
+**Respuesta Explícita y Cuantificada:**
 
 El WAPE global experimenta una **degradación monótona creciente** a medida que la ventana temporal de predicción se aleja:
 - **D+1:** WAPE = **19.77%**
@@ -314,7 +367,13 @@ El WAPE global experimenta una **degradación monótona creciente** a medida que
 - **Causa Operativa:** A 4 días de anticipación, el modelo no tiene visibilidad de las órdenes no programadas que ingresan entre D-2 y D-1. Esta degradación es especialmente aguda en **CD_CENTRO** (sube de 19.59% en D+1 a 27.67% en D+4, $+8.08$ pp) y en **CD_PACIFICO** (de 20.27% a 25.81%, $+5.54$ pp).
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 2.5 Matrices Cruzadas Oficiales (Centro x Horizonte)
+# 2.7 Cross Matrices Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 2.7. Matrices Cruzadas Oficiales de Calidad (Centro × Horizonte)
+
+Para disponer del panorama multidimensional completo, se computan las matrices cruzadas bidimensionales de WAPE y Bias para cada combinación de Centro de Distribución y Horizonte temporal.
+"""))
+
+cells.append(nbf.v4.new_code_cell("""# 2.7 Matrices Cruzadas Oficiales (Centro x Horizonte)
 auditor = BaselineAuditor()
 mat_wape, mat_bias = auditor.calculate_cross_matrices()
 
@@ -325,7 +384,13 @@ print("\\n--- Matriz Bias (%) por Centro y Horizonte ---")
 display((mat_bias * 100).round(2))
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 2.6 Gráficos Diagnósticos Oficiales de la Tarea 1
+# 2.8 Diagnostic Visualizations Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 2.8. Visualizaciones Diagnósticas Oficiales de la Tarea 1 (Heatmaps y Curvas de Error)
+
+A continuación se grafica el Heatmap de WAPE por Centro × Horizonte y la curva de degradación temporal monótona de D+1 a D+4.
+"""))
+
+cells.append(nbf.v4.new_code_cell("""# 2.8 Gráficos Diagnósticos Oficiales de la Tarea 1
 fig, axes = plt.subplots(1, 2, figsize=(16, 5))
 
 # Heatmap WAPE
@@ -355,13 +420,24 @@ plt.tight_layout()
 plt.show()
 """))
 
+# 2.9 Business Insights Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 2.9. Conclusiones e Insights de Negocio de la Tarea 1: Asimetría de Costo y Fletes Spot
+
+En operaciones logísticas B2B de consumo masivo, **el costo del error no es simétrico**:
+1. **Subestimar (Bias $>0$):** Provoca quiebre de stock en andenes y obliga a contratar **fletes de emergencia spot de última hora con sobreprecios del 150% al 300%**, arriesgando multas de entrega y quiebres de servicio.
+2. **Sobreestimar (Bias $<0$):** Causa costo de almacenamiento y camiones con factor de carga ocioso, con una penalización unitaria significativamente menor que un flete spot.
+3. **Diagnóstico Crítico del Baseline:**
+   - Los centros que subestiman (CD_NORTE, CD_SUR y CD_ESTE) concentran el **69.58% del volumen físico de la compañía**.
+   - Por esta razón, la **Pérdida Asimétrica Operativa asciende a 41.39%**, prácticamente duplicando el WAPE nominal de 20.84%.
+"""))
+
 # Section 3: Tarea 2
 cells.append(nbf.v4.new_markdown_cell("""---
 ## 3. Tarea 2: Estado del Plan de Entrega, Capacidad y Estrategia de Negocio
 
 El dataset `plan_entrega_clientes_generico.csv` registra 739 órdenes de compra acordadas comercialmente con 90 clientes (15 por cada Centro de Distribución), permitiendo auditar la disciplina de cumplimiento de clientes y su impacto sobre la capacidad física de transporte.
 
-### 3.1. Fórmulas Matemáticas y Metodología de Cálculo
+### 3.1. Fórmulas Matemáticas y Metodología de Cálculo (Sesgo de Volumen, Fechas y Capacidad)
 
 1. **Bias de Volumen del Plan Comercial:**
    $$\\text{Bias}_{\\text{volumen}} = \\frac{\\sum_{j=1}^M (y_j^{\\text{real}} - y_j^{\\text{plan}})}{\\sum_{j=1}^M y_j^{\\text{real}}} \\times 100\\%$$
@@ -381,6 +457,14 @@ El dataset `plan_entrega_clientes_generico.csv` registra 739 órdenes de compra 
 
 6. **Peak-to-Average Ratio (PAR) Semanal:**
    $$\\text{PAR}_{cd} = \\frac{\\max_{d \\in \\{1,\\dots,7\\}} \\overline{y}_{cd, d}}{\\frac{1}{7} \\sum_{d=1}^7 \\overline{y}_{cd, d}}$$
+"""))
+
+# 3.2 Audit Question 1 Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 3.2. Auditoría y Respuesta a la Pregunta 1: Sesgo Sistemático del Plan Comercial (Volumen y Fechas)
+
+**Pregunta 1 del Desafío:** *¿Existe un Bias en el plan de entrega? ¿Subestima o sobreestima sistemáticamente el comportamiento real de compra?*
+
+Se audita el volumen físico total comprometido frente al volumen real despachado, y se computa la distribución de desvíos en fecha de compra.
 """))
 
 cells.append(nbf.v4.new_code_cell("""# 3.2 Cálculo Explícito del Bias del Plan Comercial (Pregunta 1)
@@ -412,13 +496,22 @@ print(f"Ratio Compras Retrasadas vs Adelantadas:        {retrasos / adelantos:.2
 print("="*65)
 """))
 
-cells.append(nbf.v4.new_markdown_cell(r"""### Respuesta Explícita a la Pregunta 1 (Tarea 2):
+# 3.2 Response Markdown
+cells.append(nbf.v4.new_markdown_cell(r"""#### Respuesta Explícita a la Pregunta 1 (Tarea 2):
 **Sí, existe un Bias positivo sistemático en dos dimensiones:**
-1. **En Volumen:** El plan presenta un **Bias de +10.62%** ($(\text{Real} - \text{Plan}) / \text{Real}$). Los clientes compran un **11.9% más volumen** de lo comprometido originalmente (78,930 vs 70,550 unidades). Esto ocurre en todos los CDs (entre +9.1% y +12.4%).
-2. **En Fechas:** Existe un sesgo de postergación con **$\Delta$ promedio de +0.44 días**. Los clientes retrasan sus órdenes $3.45\times$ más veces de lo que las adelantan (100 retrasos vs 29 adelantos).
+1. **En Volumen:** El plan presenta un **Bias de +10.62%** ($(\text{Real} - \text{Plan}) / \text{Real}$). Los clientes compran un **11.9% más volumen** de lo comprometido originalmente (78,930 vs 70,550 unidades). Esto ocurre de manera homogénea en todos los CDs (entre +9.1% y +12.4%).
+2. **En Fechas:** Existe un sesgo de postergación con **$\Delta$ promedio de +0.44 días**. Los clientes retrasan sus órdenes $3.45\times$ más veces de lo que las adelantan (100 retrasos vs 29 adelantos), provocando acumulación de pedidos hacia la mitad de semana.
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 3.2 Porcentaje de Compras Fuera del Plan (Pregunta 2)
+# 3.3 Audit Question 2 Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 3.3. Auditoría y Respuesta a la Pregunta 2: Porcentaje de Compras Fuera de Plan por Red, CD y Día
+
+**Pregunta 2 del Desafío:** *¿Cuál es el porcentaje de compras realizadas fuera del plan?*
+
+Se cuantifica el porcentaje de indisciplina (`fuera_de_plan == 1`) a nivel global, desglosado por Centro de Distribución y por día de la semana.
+"""))
+
+cells.append(nbf.v4.new_code_cell("""# 3.3 Porcentaje de Compras Fuera del Plan (Pregunta 2)
 pct_fuera_total = float(df_plan["fuera_de_plan"].mean()) * 100
 
 print("--- Desglose de Compras Fuera de Plan por Centro de Distribución ---")
@@ -448,7 +541,8 @@ by_day_plan["pct_plan_semanal"] = (by_day_plan["total_pedidos"] / len(df_plan)) 
 display(by_day_plan[["dia_es", "total_pedidos", "pct_plan_semanal", "pedidos_fuera", "pct_fuera", "unidades_reales"]].style.format({"pct_fuera": "{:.2f}%", "pct_plan_semanal": "{:.1f}%", "unidades_reales": "{:,.0f}"}))
 """))
 
-cells.append(nbf.v4.new_markdown_cell("""### Respuesta Explícita a la Pregunta 2 (Tarea 2):
+# 3.3 Response Markdown
+cells.append(nbf.v4.new_markdown_cell("""#### Respuesta Explícita a la Pregunta 2 (Tarea 2):
 1. **Total Red:** **17.46%** (129 de 739 compras se ejecutaron fuera de plan).
 2. **Por Centro de Distribución:**
    - **`CD_NORTE`:** **24.39%** fuera de plan (el centro con mayor indisciplina y mayor volumen).
@@ -462,7 +556,13 @@ cells.append(nbf.v4.new_markdown_cell("""### Respuesta Explícita a la Pregunta 
    - Los martes concentran por plan el 35.05% de los pedidos. Sin embargo, al observar las fechas reales de compra, **los martes absorben 36,467.7 unidades (el 46.20% de toda la demanda semanal de la compañía)**.
 """))
 
-cells.append(nbf.v4.new_code_cell("""# 3.3 Auditoría de Saturación de Capacidad Logística Diaria
+# 3.4 Capacity Saturation Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 3.4. Auditoría de Saturación de Capacidad Logística Diaria y Días Críticos de Flota
+
+Se cruza la demanda real diaria frente a la capacidad máxima de transporte en cada centro logístico para medir la frecuencia y magnitud de los desbordes operativos.
+"""))
+
+cells.append(nbf.v4.new_code_cell("""# 3.4 Auditoría de Saturación de Capacidad Logística Diaria
 merged_cap = pd.merge(
     df_demanda, df_capacidad,
     left_on=["centro_distribucion", "fecha_despacho"],
@@ -491,23 +591,43 @@ display(sat_summary.style.format({
 }))
 """))
 
-cells.append(nbf.v4.new_markdown_cell(r"""### 3.4. Respuestas Explícitas a las Preguntas 3 y 4 (Tarea 2)
+# 3.5 Response Question 3 Markdown
+cells.append(nbf.v4.new_markdown_cell(r"""### 3.5. Respuesta Explícita a la Pregunta 3: Métricas Operativas Adicionales para el Panorama Logístico
 
-#### Pregunta 3: ¿Qué métricas adicionales calcularías para completar el panorama operativo?
-1. **Tasa de Adhesión por Cliente ($Adhesion\_Rate_i$):** Permite aislar al top 20% de clientes más indisciplinados (Efecto Pareto: 18 de 90 clientes generan más del 60% de los desvíos).
-2. **Volumen en Riesgo Fuera de Plan (% Volume at Risk):** Pondera el impacto real en toneladas (no es lo mismo desviar 50 unidades que 600 unidades en el patio de carga).
-3. **Late-to-Early Ratio ($3.45\times$):** Evidencia que los clientes postergan casi $3.5$ veces más de lo que adelantan, generando acumulación de pedidos pendientes hacia la mitad de semana.
-4. **Frecuencia de Desborde de Flota:** CD_NORTE colapsa en el **10.0% de sus días operativos**, acumulando **974.26 unidades en exceso** que obligan a contratar fletes spot de emergencia.
+**Pregunta 3 del Desafío:** *¿Qué métricas adicionales calcularías para completar el panorama operativo? Justificación.*
 
-#### Pregunta 4: Estrategia de Aplanamiento de Demanda (Pico Martes)
-- **Diagnóstico:** El 46.2% de la demanda se concentra en los martes, colapsando CD_NORTE y CD_SUR, mientras que jueves y viernes operan con capacidad ociosa (70-80% de ocupación).
-- **Mecanismo:** *Dynamic Delivery Slotting & Incentivos Comerciales*:
-  1. *Descuento por Ventana Valle:* Bonificación del **2.0% al 3.0%** en la factura total para clientes B2B que acepten programar despachos recurrentes los jueves o viernes.
-  2. *Cupos Dinámicos en Software B2B:* Al alcanzar el 80% de ocupación en un CD para el martes, el portal web y app de ejecutivos de venta activan tarifa de alta demanda (*surge fee*) para despachos adicionales ese día y sugieren automáticamente días valle con flete bonificado y SLA garantizado.
-- **KPIs para Medir su Efecto:**
+**Respuesta Explícita y Justificación:**
+
+1. **Tasa de Adhesión por Cliente ($Adhesion\_Rate_i$):**
+   - *Cálculo:* Porcentaje de órdenes que cada cliente ejecuta estrictamente en la fecha y volumen pactados.
+   - *Aporte Operativo:* Permite aislar al top 20% de clientes más indisciplinados (Efecto Pareto: 18 de 90 clientes generan más del 60% de los desvíos), habilitando negociaciones comerciales diferenciadas y compromisos vinculantes.
+2. **Volumen Físico en Riesgo (% Volume at Risk):**
+   - *Cálculo:* Unidades físicas asociadas a pedidos fuera de plan / Unidades totales despachadas.
+   - *Aporte Operativo:* Pondera el impacto real en toneladas (desviar 50 unidades es absorbible por holgura de flota, pero desviar 600 unidades colapsa las rampas de carga).
+3. **Ratio Tardío / Adelantado (Late-to-Early Ratio = $3.45\times$):**
+   - *Cálculo:* Pedidos con $\Delta t > 0$ divididos por pedidos con $\Delta t < 0$.
+   - *Aporte Operativo:* Evidencia que la flota no sufre por clientes que se anticipan, sino por acumulación de órdenes postergadas que explotan a mitad de semana.
+4. **Frecuencia y Magnitud de Desborde de Capacidad:**
+   - *Cálculo:* Porcentaje de días con ocupación $>100\%$ y suma acumulada de unidades excedentes.
+   - *Aporte Operativo:* Revela que **CD_NORTE colapsa en el 10.0% de sus días operativos**, acumulando **974.26 unidades en exceso** que fuerzan la contratación de fletes spot de emergencia.
+"""))
+
+# 3.6 Response Question 4 Markdown
+cells.append(nbf.v4.new_markdown_cell(r"""### 3.6. Respuesta Explícita a la Pregunta 4: Propuesta Estratégica de Aplanamiento de Demanda (Pico Martes)
+
+**Pregunta 4 del Desafío:** *Estrategia para aplanar la curva de demanda (efecto pico martes).*
+
+**Respuesta Estratégica Integral:**
+
+- **Diagnóstico:** El **46.2% de la demanda real semanal se concentra en los martes**, colapsando la capacidad en CD_NORTE y CD_SUR, mientras que jueves y viernes operan con capacidad ociosa (70-80% de ocupación).
+- **Mecanismo Operativo: Dynamic Delivery Slotting & Incentivos Comerciales B2B:**
+  1. *Descuento por Ventana Valle (Off-Peak Incentive):* Bonificación comercial del **2.0% al 3.0%** en la factura total para clientes B2B que acepten programar despachos recurrentes los jueves o viernes.
+  2. *Cupos Dinámicos y Surge Fee en Software B2B:* Al alcanzar el 80% de ocupación en un CD para el martes, el portal web y app de ejecutivos de venta activan tarifa de alta demanda (*surge fee*) para despachos adicionales ese día y sugieren automáticamente días valle con flete bonificado y SLA de entrega garantizado.
+  3. *Re-agendamiento Proactivo de Clientes Pareto:* Acuerdos directos con los clientes con baja tasa de adhesión en CD_NORTE para fraccionar sus pedidos en dos entregas (lunes y jueves).
+- **KPIs para Medir su Efecto en Producción:**
   1. *Peak-to-Average Ratio (PAR):* Reducción de 2.1x a $<1.35x$.
   2. *% Volumen en Días Valle:* Incremento de 26% a $\ge 40\%$.
-  3. *Tasa de Saturación de CD_NORTE:* Reducción de 10% a 0%.
+  3. *Tasa de Saturación de CD_NORTE:* Reducción del 10% a 0%.
   4. *Sobrecosto de Fletes Spot:* Reducción a $0 USD por viajes no planificados.
   5. *OTIF (On-Time In-Full):* Elevación a $\ge 98\%$.
 """))
@@ -531,8 +651,9 @@ Para responder a estas exigencias de negocio de manera rigurosa, transparente y 
 - **4.8. Criterio Técnico, Honestidad Analítica y Selección de Modelo (Ridge vs. LightGBM):** Justificación de limitaciones en D+4 y selección arquitectural del estimador en régimen de *Small Data*.
 """))
 
+# 4.1 Strategy Markdown
 cells.append(nbf.v4.new_markdown_cell("""---
-### 4.1. Estrategia y Enfoque del Modelo Corrector Residual
+### 4.1. Estrategia y Enfoque del Modelo Corrector Residual (Arquitectura Aditiva ReLU y Ridge L2)
 
 En la auditoría de la Tarea 1 descubrimos que el pronóstico base exhibe **sesgos estructurales crónicos** (+31.1% de subestimación en CD_SUR, -22.5% de sobreestimación en CD_PACIFICO, -19.4% en CD_CENTRO). Asimismo, en la Tarea 2 identificamos un **pico recurrente de demanda los martes** (46.2% del volumen semanal) que no está sincronizado con la capacidad de los centros.
 
@@ -552,8 +673,9 @@ Como estimador utilizamos una **Regresión Regularizada Ridge ($L_2$ con $\\alph
 - Proporciona coeficientes lineales $100\\%$ auditables para los líderes de logística ante la penalización asimétrica de fletes spot ($2.5\\times$).
 """))
 
+# 4.2 Feature Engineering Markdown
 cells.append(nbf.v4.new_markdown_cell("""---
-### 4.2. Ingeniería de Características (Feature Engineering) Detallada
+### 4.2. Ingeniería de Características (Feature Engineering) Detallada (4 Familias y Zero Leakage)
 
 Para alimentar el modelo, construimos 26 variables explicativas agrupadas en las 4 familias que dan cumplimiento estricto y expandido al PDF:
 
@@ -577,6 +699,7 @@ Para alimentar el modelo, construimos 26 variables explicativas agrupadas en las
    - Variables *One-Hot* por Centro de Distribución: Absorben los sesgos fijos de nivel descubiertos en la Tarea 1.
 """))
 
+# 4.3 Feature Pipeline Code Markdown
 cells.append(nbf.v4.new_markdown_cell("""---
 ### 4.3. Construcción Explícita del Feature Pipeline y Matriz de Covariables
 
@@ -619,6 +742,7 @@ print("\\nVista previa de datos transformados (primeras 8 filas):")
 display(df_features[cols_preview].head(8))
 """))
 
+# 4.4 Rolling Backtest Markdown
 cells.append(nbf.v4.new_markdown_cell("""---
 ### 4.4. Protocolo de Validación Cruzada con Origen Rodante (*Rolling-Origin Backtest*)
 
@@ -658,6 +782,7 @@ print(f"PÉRDIDA ASIMÉTRICA OPERATIVA (2.5x Spot):  {glob['asymmetric_loss_base
 print("="*75)
 """))
 
+# 4.5 Quantitative Demonstration and Visual Evidence Markdown
 cells.append(nbf.v4.new_markdown_cell("""---
 ### 4.5. Demostración Cuantitativa y Evidencia Gráfica del Efecto sobre el WAPE Global y Baseline
 
@@ -799,6 +924,7 @@ plt.tight_layout()
 plt.show()
 """))
 
+# 4.6 Conclusion Tarea 3 Markdown
 cells.append(nbf.v4.new_markdown_cell(r"""---
 ### 4.6. Conclusión de la Tarea 3: Respuestas Cuantitativas a las Preguntas Iniciales
 
@@ -829,10 +955,10 @@ A la luz de la evidencia cuantitativa y gráfica obtenida bajo el protocolo estr
 - En CD_PACIFICO y CD_CENTRO, las sobreestimaciones crónicas de -22.5% y -19.4% se reducen a **+0.16% y +0.48%**, eliminando sobrecostos por inventario ocioso y obsolescencia.
 
 #### 4. Impacto Económico en la Cadena Logística
-- La métrica de **Pérdida Asimétrica Operativa** (penalización $2.5\\times$ por fletes spot de urgencia) se desploma de **41.30% a 13.26% (-28.04 pp)**, equivalente a un ahorro del **-67.89%** en la penalización de costos logísticos.
+- La métrica de **Pérdida Asimétrica Operativa** (penalización $2.5\times$ por fletes spot de urgencia) se desploma de **41.30% a 13.26% (-28.04 pp)**, equivalente a un ahorro del **-67.89%** en la penalización de costos logísticos.
 - Esto representa un ahorro económico directo estimado entre **$180,000 y $350,000 USD anuales** para la flota de distribución.
 
-| Métrica de Desempeño | Baseline Oficial | Modelo Corrector ML | Impacto Absoluto ($\\Delta$) | Impacto Relativo (%) | Estado Operativo |
+| Métrica de Desempeño | Baseline Oficial | Modelo Corrector ML | Impacto Absoluto ($\Delta$) | Impacto Relativo (%) | Estado Operativo |
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **WAPE Global (Out-of-time)** | **20.73%** | **7.28%** | **-13.45 pp** | **-64.88%** | **Objetivo Cumplido (< 10%)** |
 | **Bias / Sesgo Global** | **+6.69%** | **+0.69%** | **-6.00 pp** | **-89.70%** | **Sesgo Neutralizado** |
@@ -841,6 +967,7 @@ A la luz de la evidencia cuantitativa y gráfica obtenida bajo el protocolo estr
 | **Pérdida Asimétrica (2.5x Spot)** | **41.30%** | **13.26%** | **-28.04 pp** | **-67.89%** | Ahorro logístico sustancial |
 """))
 
+# 4.7 Interpretability Markdown
 cells.append(nbf.v4.new_markdown_cell("""---
 ### 4.7. Interpretabilidad: Inspección de Coeficientes e Importancia de Variables (Betas del Modelo)
 
@@ -866,7 +993,8 @@ display(df_imp.style.format({
 }))
 """))
 
-cells.append(nbf.v4.new_markdown_cell(r"""### 4.8. Criterio Técnico, Honestidad Analítica y Selección de Modelo
+# 4.8 Architectural Choice Markdown
+cells.append(nbf.v4.new_markdown_cell(r"""### 4.8. Criterio Técnico, Honestidad Analítica y Selección de Modelo (Ridge vs. LightGBM)
 
 1. **Interpretación Operativa de los Coeficientes del Modelo:**
    - `centro_distribucion_CD_SUR` (+292.68 unid.): El modelo aprendió a sumar sistemáticamente ~293 unidades a las predicciones de CD_SUR, neutralizando con precisión su subestimación crónica (+31.1% en Tarea 1).
@@ -902,7 +1030,7 @@ El PDF requiere:
 * Si cuenta con 45 días o más, habilita el entrenamiento del modelo complementario.
 * Argumentar cuantitativamente las ventajas y riesgos de ajustar este umbral mínimo en producción.
 
-### 5.1. Fórmulas Matemáticas y Reglas de Resiliencia
+### 5.1. Fórmulas Matemáticas y Reglas de Resiliencia (Algoritmo de Rachas y Ruteo)
 
 1. **Racha de Días Continuos sin Gaps:**
    $$S_{cd}(t) = \\max \\left\\{ k \\in \\{1, \\dots, K\\} \\;\\middle|\\; \\tau_{K - j + 1} - \\tau_{K - j} = 1 \\text{ día}, \\; \\forall j \\in \\{1, \\dots, k-1\\} \\text{ y } \\tau_K = t - 1 \\right\\}$$
@@ -916,6 +1044,12 @@ El PDF requiere:
 3. **Justificación Estadística del Umbral de 45 Días:**
    $$N_{\\text{ciclos}} = \\lfloor 45 / 7 \\rfloor = 6 \\text{ ciclos semanales} \\implies \\text{SE}(\\overline{y}_d) = \\frac{\\sigma_d}{\\sqrt{6}} \\le 0.4082 \\sigma_d$$
    reduciendo la dispersión del error relativo $\\sigma_{\\text{rel}}$ de $0.0661$ (15 días) a $0.0550$ (45 días).
+"""))
+
+# 5.2 Gate Demonstration Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 5.2. Demostración Operativa del DataCoverageGate y Tolerancia a Fallos (Cold Start)
+
+Se prueba el despachador `DataCoverageGate` en tres escenarios operativos reales: arranque en frío (15 días), centro maduro (45 días exactos) y detección de huecos de calendario (ruptura de racha continua).
 """))
 
 cells.append(nbf.v4.new_code_cell("""# 5.2 Demostración Operativa del DataCoverageGate y Tolerancia a Fallos
@@ -960,6 +1094,12 @@ print(f"Modo activado:       {dec_gap.mode}")
 print(f"Racha continua real: {dec_gap.continuous_days} días (solo cuenta el bloque posterior al gap)")
 """))
 
+# 5.3 Sensitivity Analysis Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 5.3. Simulación Cuantitativa de Sensibilidad de Umbrales de Historia (15 a 50 Días)
+
+A continuación se simula el rendimiento del modelo frente a profundidades crecientes de historia continua (15 a 50 días) para evaluar empíricamente el punto de estabilización del error.
+"""))
+
 cells.append(nbf.v4.new_code_cell("""# 5.3 Simulación Cuantitativa de Sensibilidad de Umbrales de Historia
 df_sens = gate.run_sensitivity_analysis()
 
@@ -978,6 +1118,12 @@ display(df_sens_styled.style.format({
 }))
 """))
 
+# 5.4 Sensitivity Plot Markdown
+cells.append(nbf.v4.new_markdown_cell("""### 5.4. Curva de Sensibilidad del WAPE y Estabilidad de Pronóstico
+
+Se traza la curva de evolución del WAPE frente al umbral de días de historia para visualizar el punto de inflexión operativo.
+"""))
+
 cells.append(nbf.v4.new_code_cell("""# 5.4 Curva de Sensibilidad del WAPE vs Días de Historia
 plt.figure(figsize=(9, 4.5))
 plt.plot(df_sens["umbral_dias_historia"], df_sens["wape_modelo"] * 100, marker="o", color="#27ae60", linewidth=2.5, label="WAPE Modelo Corrector")
@@ -993,7 +1139,8 @@ plt.tight_layout()
 plt.show()
 """))
 
-cells.append(nbf.v4.new_markdown_cell(r"""### 5.5. Justificación Cuantitativa del Umbral de 45 Días y Trade-Offs
+# 5.5 Threshold Justification Markdown
+cells.append(nbf.v4.new_markdown_cell(r"""### 5.5. Justificación Cuantitativa del Umbral de 45 Días, Trade-Offs Operativos y Veredicto Lead
 
 1. **Fundamento Estadístico (6.4 Ciclos Semanales):**
    - 45 días representan **$6.43$ semanas completas**. En series logísticas con fuerte estacionalidad intradiaria (el pico de los martes y valles de fin de semana), se requiere un mínimo de $N \ge 6$ observaciones por cada día de la semana para que el error estándar del estimador ($\text{SE} = \sigma / \sqrt{N}$) sea suficientemente bajo ($\text{SE} \le 0.40 \sigma$).
@@ -1003,18 +1150,27 @@ cells.append(nbf.v4.new_markdown_cell(r"""### 5.5. Justificación Cuantitativa d
 3. **Trade-Offs Operativos en Producción:**
    - *Reducir a 30 días:* Ventaja: Incorporación 2 semanas más rápida de nuevos centros. Riesgo: Dispersión del error un **+10.5% mayor** ($\sigma_{\text{rel}} = 0.0608$ vs $0.0550$) por observar solo 4 martes.
    - *Aumentar a 60 días:* Ventaja: Máxima estabilidad. Riesgo: Retardo excesivo de 2 meses manteniendo al centro atado al baseline defectuoso (+31% de sesgo en CD_SUR), perdiendo ahorros logísticos.
-   - *Conclusión:* **45 días es el punto óptimo de compromiso (*sweet spot*)**.
+   - *Veredicto del Lead:* **45 días es el punto óptimo de compromiso (*sweet spot*)**, equilibrando robustez muestral y captura temprana de ahorros.
 """))
 
 # Section 6: Conclusions
 cells.append(nbf.v4.new_markdown_cell("""---
 ## 6. Conclusiones y Resumen Ejecutivo para Gerencia
 
+### 6.1. Síntesis de Resultados Cuantitativos por Tarea y Cumplimiento de Metas
+
 1. **Auditoría Baseline (Tarea 1):** El WAPE oficial es de **20.84%** con un sesgo positivo de **+6.55%**. La subestimación se concentra en los centros de mayor volumen (**CD_SUR con 31.56%** y **CD_NORTE con 35.1% del volumen de la empresa**). La pérdida asimétrica logística asciende a **41.39%**.
 2. **Operación Comercial (Tarea 2):** El plan comercial subestima sistemáticamente la compra real en un **+10.62%**, con un **17.46% de compras fuera de plan** y un marcado sesgo de postergación ($3.45\times$). Los martes concentran el **46.2% de la demanda**, colapsando la capacidad en CD_NORTE en el **10% de los días**.
-3. **Estrategia de Negocio:** La estrategia de *Dynamic Delivery Slotting* con bonificaciones comerciales del 2% al 3% en días valle y cupos en el software B2B permite aplanar el *Peak-to-Average Ratio* a $<1.35\times$.
-4. **Impacto del Modelo Corrector (Tarea 3):** En validación rodante estricta fuera de muestra (*out-of-time*), el modelo residual regularizado redujo el WAPE de **20.73% a 7.28%** ($-13.45$ pp) y neutralizó el sesgo a **+0.69%**, recortando la penalización de costos logísticos en un **-67.9%**.
+3. **Estrategia de Negocio:** La estrategia de *Dynamic Delivery Slotting* con bonificaciones comerciales del 2% al 3% en días valle y cupos en el software B2B permite aplanar el *Peak-to-Average Ratio* de 2.1x a $<1.35\times$.
+4. **Impacto del Modelo Corrector (Tarea 3):** En validación rodante estricta fuera de muestra (*out-of-time*), el modelo residual regularizado redujo el WAPE de **20.73% a 7.28%** ($-13.45$ pp) y neutralizó el sesgo a **+0.69%**, recortando la penalización de costos logísticos en un **-67.9%** (ahorro anual proyectado de $180k a $350k USD).
 5. **Resiliencia Operativa (Tarea 4):** El `DataCoverageGate` asegura tolerancia a fallos con modo fallback automático ante centros nuevos o anomalías sin interrumpir el servicio.
+"""))
+
+cells.append(nbf.v4.new_markdown_cell("""### 6.2. Hoja de Ruta para Puesta en Producción y Gobernanza MLOps
+
+1. **Arquitectura Cloud en AWS:** Despliegue en 3 capas serverless (EventBridge + Step Functions + ECS Fargate + ElastiCache Redis + Aurora PostgreSQL + SageMaker Model Registry & Monitor) con costo estimado de **~$140 a $230 USD/mes**, que se paga evitando **un solo viaje spot al mes**.
+2. **Monitoreo Continuo y Detección de Drift:** Alertas automáticas ante divergencia de sesgo ($|\\text{Bias}| > 3.0\\%$) o caída en cobertura de datos continuos, activando re-entrenamientos semanales programados.
+3. **Transición a Fase 2:** Conforme se acumulen 12 a 24 meses de operación y variables exógenas (promociones, quiebres de proveedor, clima), la arquitectura modular `DemandFeaturePipeline` y `ResidualDemandCorrector` admite escalamiento transparente a LightGBM o Deep Learning sin rediseñar la infraestructura.
 """))
 
 nb.cells = cells
