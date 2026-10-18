@@ -65,7 +65,7 @@ Queda prohibido por construcción el uso de $y_{cd, t}^{\text{real}}$ o de infor
 
 La validación se ejecutó mediante un **Rolling-Origin Backtest** estricto con ventana de calentamiento inicial de 28 días (4 semanas completas), evaluando 31 fechas continuas de emisión y un total de **708 pronósticos fuera de muestra (*out-of-time*)** sin filtración de información futura (*zero data leakage*).
 
-### 1.1. Comparativa Global: Modelo Corrector vs Baseline Oficial
+### 2.1. Comparativa Global: Modelo Corrector vs Baseline Oficial
 
 | Métrica | Baseline Oficial | Modelo Corrector ML | Impacto Absoluto | Impacto Relativo |
 | :--- | :---: | :---: | :---: | :---: |
@@ -75,7 +75,7 @@ La validación se ejecutó mediante un **Rolling-Origin Backtest** estricto con 
 | **RMSE (unidades)** | 404.89 | 164.26 | -240.63 unid. | -59.43% |
 | **Pérdida Asimétrica (Costo Logístico)** | **41.30%** | **13.26%** | **-28.04 pp** | **-67.89% en penalización de fletes** |
 
-### 1.2. Comparativa por Centro de Distribución (CD)
+### 2.2. Comparativa por Centro de Distribución (CD)
 
 | Centro de Distribución | WAPE Baseline | WAPE Modelo | Delta WAPE (pp) | Bias Baseline | Bias Modelo | Diagnóstico del Ajuste |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -86,7 +86,7 @@ La validación se ejecutó mediante un **Rolling-Origin Backtest** estricto con 
 | **CD_CENTRO** | 23.04% | **9.70%** | **-13.33 pp** | -19.35% | **+0.48%** | Estabilización de demanda centro |
 | **CD_NORTE** | 9.59% | **6.64%** | **-2.94 pp** | +7.76% | **+1.32%** | Captura precisa del pico de martes |
 
-### 1.3. Comparativa por Horizonte de Planificación
+### 2.3. Comparativa por Horizonte de Planificación
 
 | Horizonte | WAPE Baseline | WAPE Modelo | Delta WAPE (pp) | Bias Baseline | Bias Modelo | Pérdida Asimétrica Base | Pérdida Asimétrica Modelo |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
